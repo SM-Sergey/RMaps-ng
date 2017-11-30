@@ -147,7 +147,7 @@ public class TileOverlay extends TileViewOverlay implements OpenStreetMapConstan
 				radius++;
 			}
 			
-			mTileSource.getTileProvider().ResizeCashe(tilecnt*9);
+			mTileSource.getTileProvider().ResizeCashe(tilecnt*2);
 			mTileSource.setReloadTileMode(false);
 		}
 	}

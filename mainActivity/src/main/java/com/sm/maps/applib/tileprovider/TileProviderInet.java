@@ -31,13 +31,19 @@ public class TileProviderInet extends TileProviderBase {
 	private ICacheProvider mCacheProvider = null;
 	private ExecutorService mThreadPool = Executors.newFixedThreadPool(5, new SimpleThreadFactory("TileProviderInet"));
     private int threads = 0;
-    private MapTileMemCache mPrevCachedCache = new MapTileMemCache(256);
+    private final BoolObj mInUse = new BoolObj();
+    private MapTileMemCache mPrevCachedCache = new MapTileMemCache(128);
+
+    private class BoolObj extends Object {
+        public boolean flag1 = false;
+        public boolean flag2 = false;
+    }
 
 	public TileProviderInet(Context ctx, TileURLGeneratorBase gen, final String cacheDatabaseName, MapTileMemCache aTileCache, final Bitmap aLoadingMapTile, final TileSource tileSource) throws SQLiteException, RException {
 		this(ctx, gen, cacheDatabaseName, aTileCache, tileSource);
 		mLoadingMapTile = aLoadingMapTile;
 	}
-	
+
 	public TileProviderInet(Context ctx, TileURLGeneratorBase gen, final String cacheDatabaseName, MapTileMemCache aTileCache, final TileSource tileSource) throws SQLiteException, RException {
         super(ctx, tileSource);
         mTileURLGenerator = gen;
@@ -64,26 +70,43 @@ public class TileProviderInet extends TileProviderBase {
                 byte[] data = null;
                 Bitmap bmp = null;
                 boolean bmpFlag = false;
+                boolean fGC = true;
+                boolean testGC = false;
 
                 while (!mThreadPool.isShutdown()) {
 
                     xyz = null;
 
                     synchronized (mPendCacheReq) {
-                        while (mPendCacheReq.isEmpty() && !mThreadPool.isShutdown()) {
+                        while (mPendCacheReq.isEmpty() && !mThreadPool.isShutdown() && !testGC) {
                             try {
                                 mPendCacheReq.wait(300);
                             } catch (InterruptedException e) {
                             }
+                            if (mPendCacheReq.isEmpty() && !fGC) {
+                                testGC = true;
+                            }
                         }
-                        if (!mThreadPool.isShutdown()) {
+                        if (!mThreadPool.isShutdown() && !mPendCacheReq.isEmpty()) {
                             col = mPendCacheReq.values();
                             it = col.iterator();
                             xyz = it.next();
                         }
                     }
 
+                    synchronized (mInUse) {
+                        if (mInUse.flag1 || mInUse.flag2 || xyz != null) testGC = false;
+                    }
+
+                    if (testGC) {
+                        System.gc();
+                        testGC = false;
+                        fGC = true;
+                    }
+
                     if (xyz != null && !mThreadPool.isShutdown()) {
+
+                        fGC = false;
 
                         Ut.i("Downloading Maptile from url: " + xyz.TILEURL);
 
@@ -154,27 +177,37 @@ public class TileProviderInet extends TileProviderBase {
                 Collection<XYZ> col;
                 Iterator<XYZ> it;
                 boolean bmpFlag = false;
-                boolean fSend = false;
+                boolean fLast;
+                boolean clearUse = false;
+                boolean wasRun = false;
 
                 while (!mThreadPool.isShutdown()) {
 
                     xyz = null;
 
                     synchronized (mPendCache2Req) {
-                        while (mPendCache2Req.isEmpty() && !mThreadPool.isShutdown()) {
+                        while (mPendCache2Req.isEmpty() && !mThreadPool.isShutdown() && !clearUse) {
                             try {
                                 mPendCache2Req.wait(333);
                             } catch (InterruptedException e) {
                             }
-                            if (fSend) {
-                                fSend = false;
-                                SendMessageSuccess();
-                            }
+                            clearUse = wasRun && mPendCache2Req.isEmpty();
                         }
-                        if (!mThreadPool.isShutdown()) {
+                        if (!mThreadPool.isShutdown() && !mPendCache2Req.isEmpty()) {
                             col = mPendCache2Req.values();
                             it = col.iterator();
                             xyz = it.next();
+                        }
+                    }
+
+                    synchronized (mInUse) {
+                        if (clearUse) {
+                            mInUse.flag1 = false;
+                            clearUse = false;
+                            wasRun = false;
+                        } else {
+                            mInUse.flag1 = true;
+                            wasRun = true;
                         }
                     }
 
@@ -242,14 +275,12 @@ public class TileProviderInet extends TileProviderBase {
                             } else zbmp.recycle();
                         }
 
-                        fSend = false;
                         synchronized (mPendCache2Req) {
                             mPendCache2Req.remove(xyz.TILEURL);
-                            if (mPendCache2Req.isEmpty() && bmpFlag)
-                                fSend = true;
+                            fLast = mPendCache2Req.isEmpty();
                         }
 
-                        if (fSend) {
+                        if (fLast && bmpFlag) {
                             SendMessageSuccess();
                             bmpFlag = false;
                         }
@@ -265,6 +296,8 @@ public class TileProviderInet extends TileProviderBase {
                 XYZ xyz;
                 Collection<XYZ> col;
                 Iterator<XYZ> it;
+                boolean clearUse = false;
+                boolean wasRun = false;
 
                 while (!mThreadPool.isShutdown()) {
 
@@ -288,10 +321,24 @@ public class TileProviderInet extends TileProviderBase {
                                 } catch (InterruptedException e) {
                                 }
 
-                        } while (xyz == null && !mThreadPool.isShutdown());
+                            if (mPendTileReq.isEmpty() && wasRun)
+                                clearUse = true;
+
+                        } while (xyz == null && !mThreadPool.isShutdown() && !clearUse);
                     }
 
-                    if (!mThreadPool.isShutdown()) {
+                    synchronized (mInUse) {
+                        if (clearUse) {
+                            mInUse.flag2 = false;
+                            clearUse = false;
+                            wasRun = false;
+                        } else {
+                            mInUse.flag2 = true;
+                            wasRun = true;
+                        }
+                    }
+
+                    if (!mThreadPool.isShutdown() && xyz != null) {
                         try {
                             mThreadPool.execute(new DownloadThread(xyz));
                             synchronized (mPendTileReq) {
