@@ -348,7 +348,7 @@ public class MapView extends RelativeLayout {
 
 	@Override
 	public void invalidate() {
-		mTileView.postQueuedInvalidate();
+		if (mTileView != null) mTileView.postQueuedInvalidate();
 		super.invalidate();
 	}
 }
