@@ -57,6 +57,7 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.Browser;
 import android.provider.SearchRecentSuggestions;
+import android.support.v4.view.ViewConfigurationCompat;
 import android.util.DisplayMetrics;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -174,10 +175,7 @@ public class MainActivity extends AppCompatActivity {
         mTracker = GoogleAnalyticsTracker.getInstance();
         mTracker.startNewSession("UA-10715419-3", 20, this);
 
-		if (Build.VERSION.SDK_INT < 10 || Build.VERSION.SDK_INT >= 14 && ViewConfiguration.get(this).hasPermanentMenuKey())
-			mHasMenuButton = true;
-		else
-			mHasMenuButton = false;
+		mHasMenuButton = ViewConfigurationCompat.hasPermanentMenuKey(ViewConfiguration.get(this));
 
 		CreateContentView();
 		
