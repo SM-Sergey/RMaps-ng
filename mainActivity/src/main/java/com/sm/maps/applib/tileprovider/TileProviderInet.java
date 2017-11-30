@@ -110,7 +110,9 @@ public class TileProviderInet extends TileProviderBase {
                         }
 
                         if (bmp != null) {
-                            bmpFlag |= mTileCache.putTile(xyz.TILEURL, bmp, MapTileMemCache.SRC_CACHE, false);
+                            if (mTileCache.putTile(xyz.TILEURL, bmp, MapTileMemCache.SRC_CACHE, false, null)) {
+                                bmpFlag = true;
+                            } else bmp.recycle();
                         }
 
                         if (bmp == null) {
@@ -180,14 +182,14 @@ public class TileProviderInet extends TileProviderBase {
                         // Attempt to get tile from previous zooms
                         Bitmap zbmp = null;
                         Bitmap tbmp;
-                        Bitmap bmp = null;
+                        Bitmap bmp;
                         int z;
                         int x;
                         int y;
                         int xm;
                         int ym;
                         int az = 0;
-                        byte[] data = null;
+                        byte[] data;
 
                         do {
                             az += 1;
@@ -215,14 +217,30 @@ public class TileProviderInet extends TileProviderBase {
                         } while (zbmp == null && z > 0 && az <= 4);
 
                         if (zbmp != null) {
+
                             x = (zbmp.getWidth() / (1 << az)) * xm;
                             y = (zbmp.getHeight() / (1 << az)) * ym;
                             tbmp = Bitmap.createBitmap(zbmp, x, y, zbmp.getWidth() / (1 << az), zbmp.getHeight() / (1 << az));
-                            bmp = Bitmap.createScaledBitmap(tbmp, zbmp.getWidth(), zbmp.getHeight(), true);
-                        }
+                            if (tbmp != null) {
+                                bmp = Bitmap.createScaledBitmap(tbmp, zbmp.getWidth(), zbmp.getHeight(), true);
 
-                        if (bmp != null)
-                            bmpFlag |= mTileCache.putTile(xyz.TILEURL, bmp, MapTileMemCache.SRC_CACHE_SECOND, false);
+                                if (bmp != null) {
+                                    Bitmap[] arr = new Bitmap[2];
+                                    arr[0] = tbmp;
+                                    arr[1] = zbmp;
+                                    if (mTileCache.putTile(xyz.TILEURL, bmp, MapTileMemCache.SRC_CACHE_SECOND, false, arr)) {
+                                        bmpFlag = true;
+                                    } else {
+                                        bmp.recycle();
+                                        if (!tbmp.isRecycled()) tbmp.recycle();
+                                        if (!zbmp.isRecycled()) zbmp.recycle();
+                                    }
+                                } else {
+                                    if (!tbmp.isRecycled()) tbmp.recycle();
+                                    if (!zbmp.isRecycled()) zbmp.recycle();
+                                }
+                            } else zbmp.recycle();
+                        }
 
                         fSend = false;
                         synchronized (mPendCache2Req) {
@@ -307,7 +325,7 @@ public class TileProviderInet extends TileProviderBase {
             if (mXYZ.Z <= mTileSource.ZOOM_MAXDNLD) {
                 do {
                     try {
-                        data = getSingleTile(getRealURL(mXYZ.TILEURL));
+                        data = getSingleTile(mTileURLGenerator.getRealURL(mXYZ.TILEURL));
                     } catch (Exception e) {
                         data = null;
                     }
@@ -358,7 +376,7 @@ public class TileProviderInet extends TileProviderBase {
 
                         data = null;
                         try {
-                            data = getSingleTile(getRealURL(prevZURL));
+                            data = getSingleTile(mTileURLGenerator.getRealURL(prevZURL));
                         } catch (Exception e) {
                         }
 
@@ -388,13 +406,26 @@ public class TileProviderInet extends TileProviderBase {
                     x = (zbmp.getWidth() / (1 << az)) * xm;
                     y = (zbmp.getHeight() / (1 << az)) * ym;
                     tbmp = Bitmap.createBitmap(zbmp, x, y, zbmp.getWidth() / (1 << az), zbmp.getHeight() / (1 << az));
-                    bmp = Bitmap.createScaledBitmap(tbmp, zbmp.getWidth(), zbmp.getHeight(), true);
-                    if (bmp != null)
-                        mTileCache.putTile(mXYZ.TILEURL, bmp, MapTileMemCache.SRC_INET_SECOND, false);
-
+                    if (tbmp != null) {
+                        bmp = Bitmap.createScaledBitmap(tbmp, zbmp.getWidth(), zbmp.getHeight(), true);
+                        if (bmp != null) {
+                            Bitmap[] arr = new Bitmap[2];
+                            arr[0] = tbmp;
+                            arr[1] = zbmp;
+                            if (!mTileCache.putTile(mXYZ.TILEURL, bmp, MapTileMemCache.SRC_INET_SECOND, false, arr)) {
+                                bmp.recycle();
+                                if (!tbmp.isRecycled()) tbmp.recycle();
+                                if (!zbmp.isRecycled()) zbmp.recycle();
+                            }
+                        } else {
+                            tbmp.recycle();
+                            if (!zbmp.isRecycled()) zbmp.recycle();
+                        }
+                    } else zbmp.recycle();
 			    }
             } else {
-                mTileCache.putTile(mXYZ.TILEURL, bmp, MapTileMemCache.SRC_INET, false);
+                if (!mTileCache.putTile(mXYZ.TILEURL, bmp, MapTileMemCache.SRC_INET, false, null))
+                    bmp.recycle();
             }
 
 			synchronized(mPendTileReq) {

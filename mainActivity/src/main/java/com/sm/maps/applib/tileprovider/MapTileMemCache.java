@@ -28,8 +28,15 @@ public class MapTileMemCache {
 		protected boolean removeEldestEntry(Entry<K, V> eldest) {
 			if (size() > mSize) {
 				CacheItem ci = (CacheItem) eldest.getValue();
-				if (ci.bmp != null && !ci.bmp.isRecycled() && !ci.norecycle)
-					ci.bmp.recycle();
+				if (!ci.norecycle) {
+					if (ci.bmp != null && !ci.bmp.isRecycled())
+						ci.bmp.recycle();
+					if (ci.mRelated != null)
+						for (Bitmap b : ci.mRelated) {
+							if (b != null && !b.isRecycled())
+								b.recycle();
+						}
+				}
 				return true;
 			}
 			return false;
@@ -47,11 +54,13 @@ public class MapTileMemCache {
 		public Bitmap bmp;
 		public int source;
 		public boolean norecycle;
+		public Bitmap[] mRelated;
 
-		public CacheItem(Bitmap bmp, int source, boolean norecycle){
+		public CacheItem(Bitmap bmp, int source, boolean norecycle, Bitmap[] related){
 			this.norecycle = norecycle;
 			this.bmp = bmp;
 			this.source = source;
+			this.mRelated = related;
 		}
 
 	}
@@ -80,20 +89,21 @@ public class MapTileMemCache {
 	}
 
 	public synchronized void putTile(final String aTileURLString, final Bitmap aTile) {
-			mHardCachedTiles.put(aTileURLString, new CacheItem(aTile, SRC_INET, false));
+			mHardCachedTiles.put(aTileURLString, new CacheItem(aTile, SRC_INET, false, null));
 	}
 
-	public synchronized boolean putTile(final String aTileURLString, final Bitmap aTile, final int source, final boolean norecycle) {
+	public synchronized boolean putTile(final String aTileURLString, final Bitmap aTile, final int source, final boolean norecycle, final Bitmap[] related) {
 		CacheItem ci;
 		boolean applied = false;
 			ci = mHardCachedTiles.get(aTileURLString);
 			if (ci != null) {
 				if (source <= ci.source) {
-					mHardCachedTiles.put(aTileURLString, new CacheItem(aTile, source, norecycle));
+					mHardCachedTiles.remove(aTileURLString);
+					mHardCachedTiles.put(aTileURLString, new CacheItem(aTile, source, norecycle, related));
 					applied = true;
 				}
 			} else {
-				mHardCachedTiles.put(aTileURLString, new CacheItem(aTile, source, norecycle));
+				mHardCachedTiles.put(aTileURLString, new CacheItem(aTile, source, norecycle, related));
 				applied = true;
 			}
 
@@ -103,8 +113,15 @@ public class MapTileMemCache {
 	public synchronized void removeTile(final String aTileURLString) {
 			if (mHardCachedTiles.containsKey(aTileURLString)) {
 				final CacheItem ci = mHardCachedTiles.remove(aTileURLString);
-				if (ci.bmp != null && !ci.bmp.isRecycled() && !ci.norecycle)
-					ci.bmp.recycle();
+				if (!ci.norecycle) {
+					if (ci.bmp != null && !ci.bmp.isRecycled())
+						ci.bmp.recycle();
+					if (ci.mRelated != null)
+						for (Bitmap b : ci.mRelated) {
+							if (b != null && !b.isRecycled())
+								b.recycle();
+						}
+				}
 			}
 	}
 
@@ -122,8 +139,14 @@ public class MapTileMemCache {
 			Iterator<Entry<String, CacheItem>> it = mHardCachedTiles.entrySet().iterator();
 			while (it.hasNext()) {
 				final CacheItem ci = it.next().getValue();
-				if (ci.bmp != null && !ci.bmp.isRecycled() && !ci.norecycle) {
-					ci.bmp.recycle();
+				if (!ci.norecycle) {
+					if (ci.bmp != null && !ci.bmp.isRecycled())
+						ci.bmp.recycle();
+					if (ci.mRelated != null)
+						for (Bitmap b : ci.mRelated) {
+							if (b != null && !b.isRecycled())
+								b.recycle();
+						}
 				}
 			}
 		mHardCachedTiles.clear();

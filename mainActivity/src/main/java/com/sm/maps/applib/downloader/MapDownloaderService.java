@@ -376,6 +376,7 @@ public class MapDownloaderService extends Service {
 				
 				if (tileParam != null) {
 					tileParam.TILEURL = mTileSource.getTileURLGenerator().Get(tileParam.X, tileParam.Y, tileParam.Z);
+					tileParam.realURL = mTileSource.getTileURLGenerator().getRealURL(tileParam.TILEURL);
 					InputStream in = null;
 					OutputStream out = null;
 					
@@ -384,12 +385,12 @@ public class MapDownloaderService extends Service {
 								&& !mMapDatabase.existsTile(tileParam.X, tileParam.Y, tileParam.Z)) {
 							
 							byte[] data = null;
-							final URL url = new URL(tileParam.TILEURL);
+							final URL url = new URL(tileParam.realURL);
 				        	final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 				            connection.connect();
 
 				            if(connection.getResponseCode() != 200)
-								Ut.appendLog(mLogFileName, String.format("%tc %s\n	Response: %d %s", System.currentTimeMillis(), tileParam.TILEURL, connection.getResponseCode(), connection.getResponseMessage()));
+								Ut.appendLog(mLogFileName, String.format("%tc %s\n	Response: %d %s", System.currentTimeMillis(), tileParam.realURL, connection.getResponseCode(), connection.getResponseMessage()));
 
 							in = new BufferedInputStream(url.openStream(), StreamUtils.IO_BUFFER_SIZE);
 							
@@ -512,9 +513,11 @@ public class MapDownloaderService extends Service {
 		public int X;
 		public int Y;
 		public int Z;
+		public String realURL;
 		
 		public XYZ(final String tileurl, final int x, final int y, final int z) {
 			TILEURL = tileurl;
+			realURL = tileurl;
 			X = x;
 			Y = y;
 			Z = z;
