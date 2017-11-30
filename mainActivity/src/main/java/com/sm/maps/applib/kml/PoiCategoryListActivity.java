@@ -4,6 +4,7 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -40,6 +41,12 @@ public class PoiCategoryListActivity extends ListActivity {
 		AppCompatCallback callback = new AppCompatCallback() {
 			@Override
 			public void onSupportActionModeStarted(ActionMode actionMode) {
+			}
+
+			@Nullable
+			@Override
+			public ActionMode onWindowStartingSupportActionMode(ActionMode.Callback callback) {
+				return null;
 			}
 
 			@Override

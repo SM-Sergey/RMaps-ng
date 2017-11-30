@@ -17,6 +17,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.SparseBooleanArray;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -61,6 +62,12 @@ public class PoiListActivity extends ListActivity {
 		AppCompatCallback callback = new AppCompatCallback() {
 			@Override
 			public void onSupportActionModeStarted(ActionMode actionMode) {
+			}
+
+			@Nullable
+			@Override
+			public ActionMode onWindowStartingSupportActionMode(ActionMode.Callback callback) {
+				return null;
 			}
 
 			@Override
