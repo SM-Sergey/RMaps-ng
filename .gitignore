@@ -1,0 +1,7 @@
+build/*
+mainActivity/build/*
+rMapsFree/build/*
+rMapsFree/release/*
+local.properties
+.gradle/*
+.idea/*

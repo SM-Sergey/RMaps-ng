@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="@style/Theme.AppCompat">
+        <item name="multiChoiceAdapterStyle">@style/MultiChoiceAdapter</item>
+	<item name="windowNoTitle">true</item>
+	<item name="windowActionBar">false</item>
+    </style>
+
+    <style name="AppThemeTitle" parent="@style/Theme.AppCompat">
+        <item name="multiChoiceAdapterStyle">@style/MultiChoiceAdapter</item>
+	<item name="windowNoTitle">false</item>
+	<item name="windowActionBar">true</item>
+    </style>
+
+    <style name="MultiChoiceAdapter">
+        <item name="itemClickInActionMode">selectItem</item>
+    </style>
+
+</resources>
