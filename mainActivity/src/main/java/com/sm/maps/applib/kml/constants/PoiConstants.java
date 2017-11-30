@@ -138,11 +138,11 @@ public interface PoiConstants {
 
 	public static final int POI_LAST    = 60;   // count of bitmaps - 1
 
-	public static final String POI_XLAT = " WHEN 0x7F02000A THEN " + POI_I_RED
-					    + " WHEN 0x7F02000C THEN " + POI_I_BLUE
-					    + " WHEN 0x7F02000D THEN " + POI_I_GREEN
-					    + " WHEN 0x7F02000E THEN " + POI_I_WHITE
-					    + " WHEN 0x7F02000F THEN " + POI_I_YELLOW 
+	public static final String POI_XLAT = " WHEN x'7F02000A' THEN " + POI_I_RED
+					    + " WHEN x'7F02000C' THEN " + POI_I_BLUE
+					    + " WHEN x'7F02000D' THEN " + POI_I_GREEN
+					    + " WHEN x'7F02000E' THEN " + POI_I_WHITE
+					    + " WHEN x'7F02000F' THEN " + POI_I_YELLOW
 					    + " ELSE ";
 
 
