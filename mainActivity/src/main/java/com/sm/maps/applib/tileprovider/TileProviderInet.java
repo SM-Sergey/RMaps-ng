@@ -32,7 +32,7 @@ public class TileProviderInet extends TileProviderBase {
 	private ExecutorService mThreadPool = Executors.newFixedThreadPool(5, new SimpleThreadFactory("TileProviderInet"));
     private int threads = 0;
     private final BoolObj mInUse = new BoolObj();
-    private MapTileMemCache mPrevCachedCache = new MapTileMemCache(128);
+//    private MapTileMemCache mPrevCachedCache = new MapTileMemCache(128);
 
     private class BoolObj extends Object {
         public boolean flag1 = false;
@@ -72,6 +72,7 @@ public class TileProviderInet extends TileProviderBase {
                 boolean bmpFlag = false;
                 boolean fGC = true;
                 boolean testGC = false;
+                boolean fSend = false;
 
                 while (!mThreadPool.isShutdown()) {
 
@@ -80,7 +81,7 @@ public class TileProviderInet extends TileProviderBase {
                     synchronized (mPendCacheReq) {
                         while (mPendCacheReq.isEmpty() && !mThreadPool.isShutdown() && !testGC) {
                             try {
-                                mPendCacheReq.wait(300);
+                                mPendCacheReq.wait(150);
                             } catch (InterruptedException e) {
                             }
                             if (mPendCacheReq.isEmpty() && !fGC) {
@@ -99,6 +100,10 @@ public class TileProviderInet extends TileProviderBase {
                     }
 
                     if (testGC) {
+                        if (fSend) {
+                            SendMessageSuccess();
+                            fSend = false;
+                        }
                         System.gc();
                         testGC = false;
                         fGC = true;
@@ -153,7 +158,6 @@ public class TileProviderInet extends TileProviderBase {
                             }
                         }
 
-                        boolean fSend;
 
                         synchronized (mPendCacheReq) {
                             mPendCacheReq.remove(xyz.TILEURL);
@@ -188,7 +192,7 @@ public class TileProviderInet extends TileProviderBase {
                     synchronized (mPendCache2Req) {
                         while (mPendCache2Req.isEmpty() && !mThreadPool.isShutdown() && !clearUse) {
                             try {
-                                mPendCache2Req.wait(333);
+                                mPendCache2Req.wait(160);
                             } catch (InterruptedException e) {
                             }
                             clearUse = wasRun && mPendCache2Req.isEmpty();
@@ -233,8 +237,8 @@ public class TileProviderInet extends TileProviderBase {
                             ym = xyz.Y & ((1 << az) - 1);
                             if (z > 0 && z <= mTileSource.ZOOM_MAXDNLD) {
                                 String prevZurl = mTileURLGenerator.Get(x, y, z);
-                                zbmp = mPrevCachedCache.getMapTile(prevZurl);
-                                if (zbmp == null) {
+//                                zbmp = mPrevCachedCache.getMapTile(prevZurl);
+//                                if (zbmp == null) {
                                     data = mCacheProvider.getTile(prevZurl, x, y, z);
                                     if (data != null && !isBlank(data))
                                         try {
@@ -242,10 +246,10 @@ public class TileProviderInet extends TileProviderBase {
                                         } catch (Throwable e) {
                                             zbmp = null;
                                         }
-                                    if (zbmp != null) {
-                                        mPrevCachedCache.putTile(prevZurl, zbmp);
-                                    }
-                                }
+//                                    if (zbmp != null) {
+//                                        mPrevCachedCache.putTile(prevZurl, zbmp);
+//                                    }
+//                                }
                             }
                         } while (zbmp == null && z > 0 && az <= 4);
 
@@ -317,7 +321,7 @@ public class TileProviderInet extends TileProviderBase {
 
                             if (xyz == null)
                                 try {
-                                    mPendTileReq.wait(280);
+                                    mPendTileReq.wait(170);
                                 } catch (InterruptedException e) {
                                 }
 

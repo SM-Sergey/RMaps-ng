@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Debug;
 
 import com.sm.maps.applib.R;
 import com.sm.maps.applib.view.MapView;
@@ -86,7 +87,15 @@ public class ScaleBarDrawable extends Drawable {
 	    		dist = (int) (dist * 0.305);
     		}
 		}
-
+/*
+// For memory usage debugging purposes
+        {
+            long th = Runtime.getRuntime().totalMemory() / 1024;
+            long fh = Runtime.getRuntime().freeMemory() / 1024;
+            long mh = Runtime.getRuntime().maxMemory() / 1024;
+            mDist = mDist + " " + mh + "/" + th + "/" + fh ;
+        }
+*/
 		final GeoPoint c2 = center.calculateEndingGlobalCoordinates(center, 90, dist);
 		final Point p = new Point();
 		pj.toPixels(c2, p);

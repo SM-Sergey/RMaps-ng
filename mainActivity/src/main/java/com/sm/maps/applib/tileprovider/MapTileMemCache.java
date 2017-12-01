@@ -20,7 +20,7 @@ public class MapTileMemCache {
 		private int mSize;
 
 		public LRUBitmapCache(int cacheSize){
-			super(cacheSize, 0.75f, true);
+			super(cacheSize, 1, true);
 			mSize = cacheSize;
 		}
 
@@ -98,7 +98,7 @@ public class MapTileMemCache {
 			ci = mHardCachedTiles.get(aTileURLString);
 			if (ci != null) {
 				if (source <= ci.source) {
-					mHardCachedTiles.remove(aTileURLString);
+					removeTile(aTileURLString);
 					mHardCachedTiles.put(aTileURLString, new CacheItem(aTile, source, norecycle, related));
 					applied = true;
 				}

@@ -11,7 +11,7 @@ import android.os.Handler;
 public class TileProviderDual extends TileProviderBase {
 	TileProviderBase mTileProviderMap;
 	TileProviderBase mTileProviderLayer;
-	Paint mPaint;
+	Paint mPaint = new Paint();
 
 	public TileProviderDual(Context ctx, String aName, TileProviderBase aTileProviderMap, TileProviderBase aTileProviderLayer, MapTileMemCache aTileCache, TileSource tileSource) {
 
@@ -37,10 +37,10 @@ public class TileProviderDual extends TileProviderBase {
 	public Bitmap getTile(int x, int y, int z) {
 		final String tileurl = mTileURLGenerator.Get(x, y, z);
 		
-		final Bitmap bmp = mTileCache.getMapTile(tileurl);
-		if(bmp != null) {
-			return bmp;
-		}
+//		final Bitmap bmp = mTileCache.getMapTile(tileurl);
+//		if(bmp != null) {
+//			return bmp;
+//		}
 		
 		final Bitmap bmpMap = mTileProviderMap.getTile(x, y, z);
 		final Bitmap bmpLayer = mTileProviderLayer.getTile(x, y, z);
@@ -74,11 +74,10 @@ public class TileProviderDual extends TileProviderBase {
 				    }
 					
 				}
-				
 	//			mTileProviderMap.removeTile(tileurl);
 	//			mTileProviderLayer.removeTile(tileurl);
 				
-				mTileCache.putTile(tileurl, bmpDual);
+//				mTileCache.putTile(tileurl, bmpDual);
 			} catch (OutOfMemoryError e) {
 				bmpDual = bmpMap;
 			} catch (Exception e) {

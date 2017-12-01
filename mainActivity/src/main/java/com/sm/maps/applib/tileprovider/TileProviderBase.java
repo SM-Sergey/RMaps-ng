@@ -25,7 +25,6 @@ public class TileProviderBase {
 	protected Bitmap mNoMapTile2;
 	protected TileURLGeneratorBase mTileURLGenerator;
 	protected final Set<String> mPending = Collections.synchronizedSet(new HashSet<String>());
-	protected final Map<String,XYZ> mPendXYZ = Collections.synchronizedMap(new HashMap<String,XYZ>());
 
 	protected final Map<String,XYZ> mPendCacheReq = Collections.synchronizedMap(new HashMap<String,XYZ>());
 	protected final Map<String,XYZ> mPendCache2Req = Collections.synchronizedMap(new HashMap<String,XYZ>());
@@ -43,9 +42,9 @@ public class TileProviderBase {
 		super();
 		mCtx = ctx;
 		mLoadingMapTile = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_loading);
-		mNoMapTile = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile);
-		mNoMapTile1 = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile1);
-		mNoMapTile2 = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile2);
+//		mNoMapTile = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile);
+//		mNoMapTile1 = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile1);
+//		mNoMapTile2 = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile2);
 		mTileSource = tileSource;
 
 		try {
@@ -155,6 +154,7 @@ public class TileProviderBase {
 			return false;
 
 		TileSourceBase tileSrc = mLoadingMapTile == null ? mTileSource.mTileSourceBaseOverlay : mTileSource;
+		if (tileSrc == null) tileSrc = mTileSource;
 
 //		String mLogFileName = Ut.getRMapsMainDir(mCtx, "")+"/log.txt";
 
