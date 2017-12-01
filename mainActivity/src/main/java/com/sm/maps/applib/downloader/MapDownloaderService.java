@@ -379,14 +379,14 @@ public class MapDownloaderService extends Service {
 					tileParam.realURL = mTileSource.getTileURLGenerator().getRealURL(tileParam.TILEURL);
 					InputStream in = null;
 					OutputStream out = null;
+					HttpURLConnection connection = null;
 					
 					try {
-						if (mOverwriteFile || mOverwriteTiles || !mOverwriteTiles
-								&& !mMapDatabase.existsTile(tileParam.X, tileParam.Y, tileParam.Z)) {
+						if (mOverwriteFile || mOverwriteTiles || !mMapDatabase.existsTile(tileParam.X, tileParam.Y, tileParam.Z)) {
 							
 							byte[] data = null;
 							final URL url = new URL(tileParam.realURL);
-				        	final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+				        	connection = (HttpURLConnection) url.openConnection();
 							connection.setRequestProperty("User-Agent", getString(R.string.user_agent));
 							connection.setRequestProperty("Accept", getString(R.string.accept_content));
 							connection.setRequestMethod("GET");
@@ -425,8 +425,9 @@ public class MapDownloaderService extends Service {
 							Message.obtain(mHandler, R.id.tile_error, tileParam).sendToTarget();
 						System.gc();
 					} finally {
-						StreamUtils.closeStream(in);
-						StreamUtils.closeStream(out);
+						if (in != null) StreamUtils.closeStream(in);
+						if (out != null) StreamUtils.closeStream(out);
+						if (connection != null) connection.disconnect();
 					}
 					
 				}
