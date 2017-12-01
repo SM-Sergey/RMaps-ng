@@ -6,6 +6,7 @@ import org.andnav.osm.util.constants.OpenStreetMapConstants;
 import org.andnav.osm.views.util.Util;
 import org.andnav.osm.views.util.constants.OpenStreetMapViewConstants;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -14,6 +15,8 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
+import android.content.Context;
 
 import com.sm.maps.applib.tileprovider.MessageHandlerConstants;
 import com.sm.maps.applib.tileprovider.TileSource;
@@ -32,7 +35,8 @@ public class TileOverlay extends TileViewOverlay implements OpenStreetMapConstan
 	private TileView mTileView;
 	private boolean mAsOverlay;
 	private IMoveListener mMoveListener;
-
+	private int mCacheMult;
+	private int mLastTiles = 0;
 
 	public TileOverlay(TileView tileView, boolean asOverlay) {
 		super();
@@ -42,8 +46,29 @@ public class TileOverlay extends TileViewOverlay implements OpenStreetMapConstan
 		mTileView = tileView;
 		mAsOverlay = asOverlay;
 		mMoveListener = null;
+
+		InitCacheMult(false);
+
+		final SharedPreferences prefs = mTileView.getContext().getSharedPreferences("settings", 0);
+		final SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+			public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+				if (key.equals("pref_memcache")) {
+					InitCacheMult(true);
+				}
+			}
+		};
+		prefs.registerOnSharedPreferenceChangeListener(listener);
+
 	}
-	
+
+	public void InitCacheMult(boolean fResize) {
+		Context ctx = mTileView.getContext();
+		final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
+		mCacheMult = Integer.parseInt(pref.getString("pref_memcache", "2"));
+		if (fResize && mTileSource!=null && mLastTiles != 0)
+			mTileSource.getTileProvider().ResizeCashe(mLastTiles*mCacheMult);
+	}
+
 	public void setTileSource(TileSource tileSource) {
 		if(mTileSource != null)
 			mTileSource.Free();
@@ -146,8 +171,9 @@ public class TileOverlay extends TileViewOverlay implements OpenStreetMapConstan
 				
 				radius++;
 			}
-			
-			mTileSource.getTileProvider().ResizeCashe(tilecnt*6);
+
+			mLastTiles = tilecnt;
+			mTileSource.getTileProvider().ResizeCashe(mLastTiles*mCacheMult);
 			mTileSource.setReloadTileMode(false);
 		}
 	}

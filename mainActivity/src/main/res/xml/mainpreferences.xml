@@ -237,6 +237,16 @@
             android:summary="@string/pref_onlinecache_summary"
             android:title="@string/pref_onlinecache" >
         </CheckBoxPreference>
+        
+        <ListPreference
+            android:defaultValue="2"
+            android:entries="@array/memcache_pref_title"
+            android:entryValues="@array/memcache_pref_values"
+            android:key="pref_memcache"
+            android:summary="@string/pref_memcache_summary"
+            android:title="@string/pref_memcache" >
+        </ListPreference>
+        
     </PreferenceCategory>
 
 </PreferenceScreen>

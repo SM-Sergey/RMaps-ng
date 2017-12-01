@@ -20,8 +20,8 @@ public class MapTileMemCache {
 		private int mSize;
 
 		public LRUBitmapCache(int cacheSize){
-			super(cacheSize, 1, true);
-			mSize = cacheSize;
+			super(cacheSize + 1, 1, true);
+			mSize = cacheSize + 1;
 		}
 
 		@Override
@@ -40,12 +40,6 @@ public class MapTileMemCache {
 				return true;
 			}
 			return false;
-		}
-
-		public void resize(int size) {
-			int sz = size + (size >> 2);
-			if (sz > mSize)
-				mSize = sz;
 		}
 
 	}
@@ -129,9 +123,11 @@ public class MapTileMemCache {
 	}
 	
 	public synchronized void Resize(final int size) {
-		if(size > mSize){
+		if(size != mSize){
+			LRUBitmapCache<String, CacheItem> newCache = new LRUBitmapCache<String, CacheItem>(size);
+			newCache.putAll(mHardCachedTiles);
 			mSize = size;
-			mHardCachedTiles.resize(size);
+			mHardCachedTiles = newCache;
 		}
 	}
 

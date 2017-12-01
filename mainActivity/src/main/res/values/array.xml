@@ -103,5 +103,17 @@
         <item>Surfing</item>
         <item>Paragliding</item>
     </string-array>
+    <string-array name="memcache_pref_title">
+        <item>1 (minimal)</item>
+        <item>2 (default)</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9 (high perf, but may crash)</item>
+        <item>10</item>
+    </string-array>
 
 </resources>

@@ -160,6 +160,8 @@ How to and FAQ you can find on http://robertdeveloper.blogspot.com/\n</string>
     <string name="error_send">Generate report</string>
     <string name="pref_onlinecache">Online maps cache</string>
     <string name="pref_onlinecache_summary">Store online maps tiles to sdcard</string>
+    <string name="pref_memcache">Tile cache in RAM</string>
+    <string name="pref_memcache_summary">RAM cache size in counts of tiles on screen</string>
     <string name="message_wait">Wait a moment, please&#8230;</string>
     <string name="pref_dir">Directories</string>
     <string name="pref_dir_main">Main RMaps directory</string>

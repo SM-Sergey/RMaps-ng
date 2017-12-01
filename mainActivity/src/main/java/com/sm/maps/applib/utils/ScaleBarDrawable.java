@@ -87,7 +87,7 @@ public class ScaleBarDrawable extends Drawable {
 	    		dist = (int) (dist * 0.305);
     		}
 		}
-/*
+
 // For memory usage debugging purposes
         {
             long th = Runtime.getRuntime().totalMemory() / 1024;
@@ -95,7 +95,7 @@ public class ScaleBarDrawable extends Drawable {
             long mh = Runtime.getRuntime().maxMemory() / 1024;
             mDist = mDist + " " + mh + "/" + th + "/" + fh ;
         }
-*/
+
 		final GeoPoint c2 = center.calculateEndingGlobalCoordinates(center, 90, dist);
 		final Point p = new Point();
 		pj.toPixels(c2, p);

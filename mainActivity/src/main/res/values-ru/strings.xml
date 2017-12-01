@@ -158,6 +158,8 @@ All rights reserved\n
   <string name="error_send">Создать отчет</string>
   <string name="pref_onlinecache">Кэш онлайн карт</string>
   <string name="pref_onlinecache_summary">Сохранять тайлы онлайн карт на sd карте</string>
+  <string name="pref_memcache">Кэш тайлов в памяти</string>
+  <string name="pref_memcache_summary">Размер кэша тайлов в кол-вах тайлов на экране</string>
   <string name="message_wait">Подождите минутку, пожалуйста...</string>
   <string name="pref_dir">Папки</string>
   <string name="pref_dir_main">Основная папка RMaps</string>
