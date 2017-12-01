@@ -54,77 +54,96 @@ public interface PoiConstants {
 	public static final String UPDATE_MAPS = "mapid = @1";
 
 	public static final int[] POI_RES_ID =  {
-		R.drawable.poi,
-		R.drawable.poiblue,
-		R.drawable.poigreen,
-		R.drawable.poiwhite,
-		R.drawable.poiyellow,
+			R.drawable.poi_redinfo, // poi,      // 0 - old RMaps 0x7F02000A
+			R.drawable.poi_blueinfo, // blue,    // 1 - old RMaps 0x7F02000C
+			R.drawable.poi_greeninfo, // green,  // 2 - old RMaps 0x7F02000D
+			R.drawable.poi_grayinfo, // white,   // 3 - old RMaps 0x7F02000E
+			R.drawable.poi_yellinfo, // yellow,  // 4 - old RMaps 0x7F02000F
+			R.drawable.poi_magentinfo,
+			R.drawable.poi_cyaninfo,
 
-		R.drawable.poi_redbigfish,
-		R.drawable.poi_bluebigfish,
-		R.drawable.poi_greenbigfish,
-		R.drawable.poi_magentbigfish,
-		R.drawable.poi_yellbigfish,
-		R.drawable.poi_cyanbigfish,
+			R.drawable.poi_redbigfish,
+			R.drawable.poi_bluebigfish,
+			R.drawable.poi_greenbigfish,
+			R.drawable.poi_graybigfish,
+			R.drawable.poi_yellbigfish,
+			R.drawable.poi_magentbigfish,
+			R.drawable.poi_cyanbigfish,
 
-		R.drawable.poi_redfish,
-		R.drawable.poi_bluefish,
-		R.drawable.poi_greenfish,
-		R.drawable.poi_magentfish,
-		R.drawable.poi_yellfish,
-		R.drawable.poi_cyanfish,
+			R.drawable.poi_redfish,
+			R.drawable.poi_bluefish,
+			R.drawable.poi_greenfish,
+			R.drawable.poi_grayfish,
+			R.drawable.poi_yellfish,
+			R.drawable.poi_magentfish,
+			R.drawable.poi_cyanfish,
 
-		R.drawable.poi_redwood,
-		R.drawable.poi_bluewood,
-		R.drawable.poi_greenwood,
-		R.drawable.poi_magentwood,
-		R.drawable.poi_yellwood,
-		R.drawable.poi_cyanwood,
+			R.drawable.poi_redwhat,
+			R.drawable.poi_bluewhat,
+			R.drawable.poi_greenwhat,
+			R.drawable.poi_graywhat,
+			R.drawable.poi_yellwhat,
+			R.drawable.poi_magentwhat,
+			R.drawable.poi_cyanwhat,
 
-		R.drawable.poi_redgryb,
-		R.drawable.poi_bluegryb,
-		R.drawable.poi_greengryb,
-		R.drawable.poi_magentgryb,
-		R.drawable.poi_yellgryb,
-		R.drawable.poi_cyangryb,
+			R.drawable.poi_redwood,
+			R.drawable.poi_bluewood,
+			R.drawable.poi_greenwood,
+			R.drawable.poi_graywood,
+			R.drawable.poi_yellwood,
+			R.drawable.poi_magentwood,
+			R.drawable.poi_cyanwood,
 
-		R.drawable.poi_stop,
-		R.drawable.poi_stop2,
+			R.drawable.poi_redgryb,
+			R.drawable.poi_bluegryb,
+			R.drawable.poi_greengryb,
+			R.drawable.poi_graygryb,
+			R.drawable.poi_yellgryb,
+			R.drawable.poi_magentgryb,
+			R.drawable.poi_cyangryb,
 
-		R.drawable.poi_redberry,
-		R.drawable.poi_blueberry,
-		R.drawable.poi_greenberry,
-		R.drawable.poi_magentberry,
-		R.drawable.poi_yellberry,
-		R.drawable.poi_cyanberry,
+			R.drawable.poi_redberry,
+			R.drawable.poi_blueberry,
+			R.drawable.poi_greenberry,
+			R.drawable.poi_grayberry,
+			R.drawable.poi_yellberry,
+			R.drawable.poi_magentberry,
+			R.drawable.poi_cyanberry,
 
-		R.drawable.poi_redboat,
-		R.drawable.poi_blueboat,
-		R.drawable.poi_greenboat,
-		R.drawable.poi_magentboat,
-		R.drawable.poi_yellboat,
-		R.drawable.poi_cyanboat,
+			R.drawable.poi_stop,
+			R.drawable.poi_stop2,
 
-		R.drawable.poi_redkar,
-		R.drawable.poi_bluekar,
-		R.drawable.poi_greenkar,
-		R.drawable.poi_magentkar,
-		R.drawable.poi_yellkar,
-		R.drawable.poi_cyankar,
+			R.drawable.poi_redkar,
+			R.drawable.poi_bluekar,
+			R.drawable.poi_greenkar,
+			R.drawable.poi_graykar,
+			R.drawable.poi_yellkar,
+			R.drawable.poi_magentkar,
+			R.drawable.poi_cyankar,
 
-		R.drawable.poi_redanchor,
-		R.drawable.poi_blueanchor,
-		R.drawable.poi_greenanchor,
-		R.drawable.poi_magentanchor,
-		R.drawable.poi_yellanchor,
-		R.drawable.poi_cyananchor,
+			R.drawable.poi_redboat,
+			R.drawable.poi_blueboat,
+			R.drawable.poi_greenboat,
+			R.drawable.poi_grayboat,
+			R.drawable.poi_yellboat,
+			R.drawable.poi_magentboat,
+			R.drawable.poi_cyanboat,
 
-		R.drawable.poi_redkemping,
-		R.drawable.poi_bluekemping,
-		R.drawable.poi_greenkemping,
-		R.drawable.poi_magentkemping,
-		R.drawable.poi_yellkemping,
-		R.drawable.poi_cyankemping
+			R.drawable.poi_redanchor,
+			R.drawable.poi_blueanchor,
+			R.drawable.poi_greenanchor,
+			R.drawable.poi_grayanchor,
+			R.drawable.poi_yellanchor,
+			R.drawable.poi_magentanchor,
+			R.drawable.poi_cyananchor,
+
+			R.drawable.poi_redkemping,
+			R.drawable.poi_bluekemping,
+			R.drawable.poi_greenkemping,
+			R.drawable.poi_graykemping,
+			R.drawable.poi_yellkemping,
+			R.drawable.poi_magentkemping,
+			R.drawable.poi_cyankemping
 
 	};
 
@@ -136,7 +155,7 @@ public interface PoiConstants {
 	public static final int POI_I_WHITE	= 3;
 	public static final int POI_I_YELLOW = 4;
 
-	public static final int POI_LAST    = 60;   // count of bitmaps - 1
+	public static final int POI_LAST    = 78;   // count of bitmaps - 1
 
 	public static final String POI_XLAT = " WHEN x'7F02000A' THEN " + POI_I_RED
 					    + " WHEN x'7F02000C' THEN " + POI_I_BLUE
