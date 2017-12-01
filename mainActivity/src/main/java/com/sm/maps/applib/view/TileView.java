@@ -18,17 +18,17 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.preference.PreferenceManager;
+import android.support.v4.view.GestureDetectorCompat;
+import android.support.v4.view.MotionEventCompat;
+import android.support.v4.view.ScaleGestureDetectorCompat;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 
 import com.sm.maps.applib.overlays.TileOverlay;
-import com.sm.maps.applib.reflection.OnExGestureListener;
-import com.sm.maps.applib.reflection.RGestureHelper;
-import com.sm.maps.applib.reflection.VerGestureDetector;
-import com.sm.maps.applib.reflection.VerScaleGestureDetector;
 import com.sm.maps.applib.tileprovider.TileSource;
 
 public class TileView extends View {
@@ -55,17 +55,23 @@ public class TileView extends View {
 	protected final List<TileViewOverlay> mOverlays = new ArrayList<TileViewOverlay>();
 	private TileOverlay mTileOverlay;
 	
-	private GestureDetector mDetector = VerGestureDetector.newInstance().getGestureDetector(getContext(), new TouchListener()); 
-	private VerScaleGestureDetector mScaleDetector = VerScaleGestureDetector.newInstance(getContext(), new ScaleListener());
+	private GestureDetectorCompat mDetector;
+	private ScaleGestureDetector mScaleDetector;
 
 	private final LinkedList<dummy_class> mQueue = new LinkedList<dummy_class>();
 
 	private class dummy_class {	}
 
-	private class ScaleListener implements VerScaleGestureDetector.OnGestureListener {
+	private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
 
-		public void onScale(double aScaleFactor) {
-			mTouchScale = mPrevScaleFactor*aScaleFactor;
+		@Override
+		public boolean onScaleBegin(ScaleGestureDetector detector) {
+			return super.onScaleBegin(detector);
+		}
+
+		@Override
+		public boolean onScale(ScaleGestureDetector detector) {
+			mTouchScale = mPrevScaleFactor*detector.getScaleFactor();
 
 			if (mTouchScale >= 8) mTouchScale = 8;
 			if (mTouchScale <= 1/8) mTouchScale = 1/8;
@@ -74,10 +80,12 @@ public class TileView extends View {
 				mMoveListener.onZoomDetected();
 			
 			invalidate(); //postInvalidate();
+
+			return super.onScale(detector);
 		}
 
-
-		public void onScaleEnd() {
+		@Override
+		public void onScaleEnd(ScaleGestureDetector detector) {
 
 			int zc = 0;
 			int zoom = getZoomLevel();
@@ -117,11 +125,50 @@ public class TileView extends View {
 			if (zc != 0) setZoomLevel(getZoomLevel() + zc, false);
 			else invalidate();
 
+			super.onScaleEnd(detector);
+
 		}
 		
 	}
-	
-	private class TouchListener implements OnExGestureListener {
+
+	private class DoubleTapListener implements GestureDetector.OnDoubleTapListener {
+
+		@Override
+		public boolean onSingleTapConfirmed(MotionEvent e) {
+			for (TileViewOverlay osmvo : mOverlays)
+				if (osmvo.onSingleTapUp(e, TileView.this)) {
+					invalidate();
+					return true;
+				}
+
+			invalidate();
+			return false;
+		}
+
+		@Override
+		public boolean onDoubleTap(MotionEvent e) {
+			if (mBearing != 0) {
+				mBearing = 0;
+			} else {
+				final GeoPoint newCenter = TileView.this.getProjection().fromPixels(e.getX(), e.getY());
+				setMapCenter(newCenter);
+
+				zoomIn();
+			}
+
+			return true;
+		}
+
+		@Override
+		public boolean onDoubleTapEvent(MotionEvent e) {
+			return false;
+		}
+
+	}
+
+	private class TouchListener implements GestureDetector.OnGestureListener {
+
+		@Override
 		public boolean onDown(MotionEvent e) {
 			for (TileViewOverlay osmvo : mOverlays) {
 				if(osmvo.onDown(e, TileView.this))
@@ -131,18 +178,8 @@ public class TileView extends View {
 			return true;
 		}
 
+		@Override
 		public boolean onSingleTapUp(MotionEvent e) {
-			return false;
-		}
-
-		public boolean onSingleTapConfirmed(MotionEvent e) {
-			for (TileViewOverlay osmvo : mOverlays)
-				if (osmvo.onSingleTapUp(e, TileView.this)) {
-					invalidate();
-					return true;
-				}
-			
-			invalidate();
 			return false;
 		}
 
@@ -160,6 +197,7 @@ public class TileView extends View {
 			showContextMenu();
 		}
 
+		@Override
 		public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
 			for (TileViewOverlay osmvo : mOverlays) {
 				if(osmvo.onScroll(e1, e2, distanceX, distanceY, TileView.this))
@@ -175,7 +213,9 @@ public class TileView extends View {
 					- (int) (Math.sin(Math.toRadians(aRotateToAngle)) * (distanceX / mTouchScale));
 			final GeoPoint newCenter = TileView.this.getProjection().fromPixels(viewWidth_2 + TouchMapOffsetX,
 					viewHeight_2 + TouchMapOffsetY);
-			if(mSetOffsetMode && ((RGestureHelper) mDetector).getPointerCount(e2) == 1) {
+
+
+			if(mSetOffsetMode && MotionEventCompat.getPointerCount(e2) == 1) {
 				mOffsetLat = mOffsetLat + (newCenter.getLatitudeE6() - mLatitudeE6) / 1E6;
 				mOffsetLon = mOffsetLon + (newCenter.getLongitudeE6() - mLongitudeE6) / 1E6;
 				mTileOverlay.setOffset(mOffsetLat, mOffsetLon);
@@ -190,34 +230,21 @@ public class TileView extends View {
 			return false;
 		}
 
-		public boolean onDoubleTap(MotionEvent e) {
-			if (mBearing != 0) {
-				mBearing = 0;
-			} else {
-				final GeoPoint newCenter = TileView.this.getProjection().fromPixels(e.getX(), e.getY());
-				setMapCenter(newCenter);
-
-				zoomIn();
-			}
-
-			return true;
-		}
-
+		@Override
 		public void onShowPress(MotionEvent e) {
 		}
 
+		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 			return false;
 		}
 
-		public void onUp(MotionEvent e) {
-			for (TileViewOverlay osmvo : mOverlays) {
-				osmvo.onUp(e, TileView.this);
-			}
-		}
+	}
 
-		public boolean onDoubleTapEvent(MotionEvent e) {
-			return false;
+
+	public void onUp(MotionEvent e) {
+		for (TileViewOverlay osmvo : mOverlays) {
+			osmvo.onUp(e, TileView.this);
 		}
 	}
 
@@ -254,6 +281,13 @@ public class TileView extends View {
 		setFocusableInTouchMode(true);
 		
 		mTileOverlay = new TileOverlay(this, false);
+
+		mDetector = new GestureDetectorCompat(this.getContext(), new TouchListener());
+		mDetector.setOnDoubleTapListener(new DoubleTapListener());
+
+		mScaleDetector = new ScaleGestureDetector(this.getContext(), new ScaleListener());
+		ScaleGestureDetectorCompat.setQuickScaleEnabled(mScaleDetector, false);
+
 	}
 	
 	public PoiMenuInfo mPoiMenuInfo = new PoiMenuInfo(-1);
@@ -283,10 +317,15 @@ public class TileView extends View {
 		boolean result = false;
 		
 		if(!mDisableControl) {
+
+			if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_UP)
+				onUp(event);
+
 			mScaleDetector.onTouchEvent(event);
+
 			result = mDetector.onTouchEvent(event);
 			if (!result) {
-				if (event.getAction() == MotionEvent.ACTION_UP) {
+				if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_UP) {
 					result = true;
 				}
 			}
