@@ -1694,7 +1694,7 @@ public class MainActivity extends AppCompatActivity {
 
 			if(mAutoFollow)
 				setAutoFollow(false);
-			mMap.InvalidateScaleBar(); // for debug purposes
+//			mMap.InvalidateScaleBar(); // for debug purposes
 
 		}
 

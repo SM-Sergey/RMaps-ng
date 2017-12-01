@@ -42,9 +42,9 @@ public class TileProviderBase {
 		super();
 		mCtx = ctx;
 		mLoadingMapTile = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_loading);
-		mNoMapTile = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile);
-		mNoMapTile1 = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile1);
-		mNoMapTile2 = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile2);
+//		mNoMapTile = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile);
+//		mNoMapTile1 = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile1);
+//		mNoMapTile2 = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile2);
 		mTileSource = tileSource;
 
 		try {
