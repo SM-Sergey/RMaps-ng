@@ -387,6 +387,10 @@ public class MapDownloaderService extends Service {
 							byte[] data = null;
 							final URL url = new URL(tileParam.realURL);
 				        	final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+							connection.setRequestProperty("User-Agent", getString(R.string.user_agent));
+							connection.setRequestProperty("Accept", getString(R.string.accept_content));
+							connection.setRequestMethod("GET");
+
 				            connection.connect();
 
 				            if(connection.getResponseCode() != 200)

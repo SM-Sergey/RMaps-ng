@@ -25,4 +25,6 @@
     <string name="donation">RMaps.Donation&#8230;</string>
     <string name="mymap">MyMapFileName</string>
     <string name="error_other">%s</string>
+    <string name="user_agent">RMaps/0.10.0</string>
+    <string name="accept_content">image/*</string>
 </resources>

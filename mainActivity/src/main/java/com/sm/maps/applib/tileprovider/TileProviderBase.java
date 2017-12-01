@@ -35,7 +35,7 @@ public class TileProviderBase {
 	protected boolean mReloadTileMode = false;
 
 	protected TileSource mTileSource;
-	private Context mCtx;
+	protected Context mCtx;
 	private MessageDigest mDg = null;
 
 	public TileProviderBase(Context ctx, TileSource tileSource) {

@@ -21,6 +21,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 
+import com.sm.maps.applib.R;
 import com.sm.maps.applib.utils.ICacheProvider;
 import com.sm.maps.applib.utils.RException;
 import com.sm.maps.applib.utils.SQLiteMapDatabase;
@@ -538,8 +539,10 @@ public class TileProviderInet extends TileProviderBase {
 
 		try {
 		    HttpURLConnection conn = (HttpURLConnection) (new URL(tileurl)).openConnection();
-		    conn.setRequestProperty("User-Agent", "RMaps/0.10.0");
-            conn.setRequestProperty("Accept", "image/*");
+            conn.setRequestProperty("User-Agent", mCtx.getString(R.string.user_agent));
+            conn.setRequestProperty("Accept", mCtx.getString(R.string.accept_content));
+//		    conn.setRequestProperty("User-Agent", "RMaps/0.10.0");
+//            conn.setRequestProperty("Accept", "image/*");
             conn.setRequestMethod("GET");
 			in = new BufferedInputStream(conn.getInputStream(), StreamUtils.IO_BUFFER_SIZE);
 			final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
