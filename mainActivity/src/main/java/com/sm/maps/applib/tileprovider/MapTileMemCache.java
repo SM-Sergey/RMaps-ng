@@ -83,23 +83,24 @@ public class MapTileMemCache {
 	}
 
 	public synchronized void putTile(final String aTileURLString, final Bitmap aTile) {
-			mHardCachedTiles.put(aTileURLString, new CacheItem(aTile, SRC_INET, false, null));
+		putTile(aTileURLString, aTile, SRC_INET, false, null);
 	}
 
 	public synchronized boolean putTile(final String aTileURLString, final Bitmap aTile, final int source, final boolean norecycle, final Bitmap[] related) {
 		CacheItem ci;
 		boolean applied = false;
-			ci = mHardCachedTiles.get(aTileURLString);
-			if (ci != null) {
-				if (source <= ci.source) {
-					removeTile(aTileURLString);
-					mHardCachedTiles.put(aTileURLString, new CacheItem(aTile, source, norecycle, related));
-					applied = true;
-				}
-			} else {
+
+		ci = mHardCachedTiles.get(aTileURLString);
+		if (ci != null) {
+			if (source <= ci.source) {
+				removeTile(aTileURLString);
 				mHardCachedTiles.put(aTileURLString, new CacheItem(aTile, source, norecycle, related));
 				applied = true;
 			}
+		} else {
+			mHardCachedTiles.put(aTileURLString, new CacheItem(aTile, source, norecycle, related));
+			applied = true;
+		}
 
 		return applied;
 	}

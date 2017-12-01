@@ -42,9 +42,9 @@ public class TileProviderBase {
 		super();
 		mCtx = ctx;
 		mLoadingMapTile = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_loading);
-//		mNoMapTile = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile);
-//		mNoMapTile1 = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile1);
-//		mNoMapTile2 = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile2);
+		mNoMapTile = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile);
+		mNoMapTile1 = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile1);
+		mNoMapTile2 = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.maptile_notile2);
 		mTileSource = tileSource;
 
 		try {
@@ -135,6 +135,7 @@ public class TileProviderBase {
 		public int Y;
 		public int Z;
 		public boolean waiting;
+		public boolean mReload;
 
 		public XYZ(final String tileurl, final int x, final int y, final int z) {
 			TILEURL = tileurl;
@@ -142,6 +143,7 @@ public class TileProviderBase {
 			Y = y;
 			Z = z;
 			waiting = false;
+			mReload = mReloadTileMode;
 		}
 	}
 
@@ -153,21 +155,11 @@ public class TileProviderBase {
 		if (mDg == null)
 			return false;
 
-		TileSourceBase tileSrc = mLoadingMapTile == null ? mTileSource.mTileSourceBaseOverlay : mTileSource;
-		if (tileSrc == null) tileSrc = mTileSource;
-
-//		String mLogFileName = Ut.getRMapsMainDir(mCtx, "")+"/log.txt";
-
-//		if (mTileSource.BLANKTILE != null)
-//		Ut.appendLog(mLogFileName, "BT:"+mTileSource.BLANKTILE);
-//		else
-//		Ut.appendLog(mLogFileName, "No blank tiles");
+		TileSourceBase tileSrc = getTileSource();
 
 		if (tileSrc == null || tileSrc.blankTiles == null || tileSrc.blankTiles.length == 0) {
 			return false;
 		}
-
-//		Ut.appendLog(mLogFileName, "BTA:" + mTileSource.blankTiles[0]);
 
 		byte[] di = mDg.digest(data);
 		BigInteger bi = new BigInteger(1,di);
@@ -178,6 +170,16 @@ public class TileProviderBase {
 		}
 
 		return false;
+	}
+
+	protected TileSourceBase getTileSource() {
+		TileSourceBase tileSrc = mLoadingMapTile == null ? mTileSource.mTileSourceBaseOverlay : mTileSource;
+		if (tileSrc == null) tileSrc = mTileSource;
+		return tileSrc;
+	}
+
+	public void setReloadTileMode(boolean mode) {
+		mReloadTileMode = mode;
 	}
 
 }

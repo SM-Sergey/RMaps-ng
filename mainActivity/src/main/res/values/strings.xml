@@ -162,6 +162,10 @@ How to and FAQ you can find on http://robertdeveloper.blogspot.com/\n</string>
     <string name="pref_onlinecache_summary">Store online maps tiles to sdcard</string>
     <string name="pref_memcache">Tile cache in RAM</string>
     <string name="pref_memcache_summary">RAM cache size in counts of tiles on screen</string>
+    <string name="pref_prevz_cached">Tiles from prev zoom's (cache, offline)</string>
+    <string name="pref_prevz_cached_summary">If cache (or offline map) doesn't contain tile for current zoom, attempt to get and rescale tile from N previous zoom's</string>
+    <string name="pref_prevz_inet">Tiles from prev zoom's (online)</string>
+    <string name="pref_prevz_inet_summary">If online map source doesn't contain tile for current zoom, attempt to get and rescale tile from N previous zoom's</string>
     <string name="message_wait">Wait a moment, please&#8230;</string>
     <string name="pref_dir">Directories</string>
     <string name="pref_dir_main">Main RMaps directory</string>

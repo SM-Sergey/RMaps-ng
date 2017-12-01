@@ -28,6 +28,8 @@ public class TileSourceBase {
 	public static final String MAPNIK = "mapnik";
 	protected static final String EN = "en";
 	protected static final String PREF_ONLINECACHE = "pref_onlinecache";
+	protected static final String PREF_PREVZCACHED = "pref_prevz_cached";
+	protected static final String PREF_PREVZINET = "pref_prevz_inet";
 	protected static final String PREF_GOOGLELANG = "pref_googlelanguagecode";
 	public static final String USERMAP_ = "usermap_";
 	public static final String PREF_USERMAP_ = "pref_usermaps_";
@@ -62,16 +64,34 @@ public class TileSourceBase {
 	public boolean LAYER, mOnlineMapCacheEnabled, GOOGLESCALE = false, TIMEDEPENDENT = false;
 	public double MAPTILE_SIZE_FACTOR = 1.0, GOOGLESCALE_SIZE_FACTOR = 1.0;
 	public double OFFSET_LAT = 0, OFFSET_LON = 0;
+	public int mPrevZCached = 4;
+	public int mPrevZInet = 4;
 
 	public String[] blankTiles = null;
 
 	public TileSourceBase(Context ctx, String aId) throws SQLiteException, RException {
+
 		if (aId.equalsIgnoreCase(EMPTY))
 			aId = MAPNIK;
 		
 		final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
 		mOnlineMapCacheEnabled = pref.getBoolean(PREF_ONLINECACHE, true);
+		mPrevZCached = Integer.parseInt(pref.getString(PREF_PREVZCACHED,"4"));
+		mPrevZInet = Integer.parseInt(pref.getString(PREF_PREVZINET,"4"));
 		GOOGLE_LANG_CODE = pref.getString(PREF_GOOGLELANG, EN);
+
+		final SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+			public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+				if (key.equals(PREF_PREVZCACHED))
+					mPrevZCached = Integer.parseInt(prefs.getString(PREF_PREVZCACHED,"4"));
+				if (key.equals(PREF_PREVZINET))
+					mPrevZInet = Integer.parseInt(prefs.getString(PREF_PREVZINET,"4"));
+				if (key.equals(PREF_ONLINECACHE))
+					mOnlineMapCacheEnabled = prefs.getBoolean(PREF_ONLINECACHE, true);
+			}
+		};
+		pref.registerOnSharedPreferenceChangeListener(listener);
+
 		this.OVERLAYID = EMPTY;
 		this.OFFSET_LAT = pref.getFloat(aId+OFFSETLAT_, 0);
 		this.OFFSET_LON = pref.getFloat(aId+OFFSETLON_, 0);

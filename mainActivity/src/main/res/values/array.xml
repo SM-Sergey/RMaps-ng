@@ -115,5 +115,21 @@
         <item>9 (high perf, but may crash)</item>
         <item>10</item>
     </string-array>
+    <string-array name="prevz_pref_title">
+        <item>Don't use</item>
+        <item>From previous only</item>
+        <item>From two prev. zooms</item>
+        <item>From three prev. zooms</item>
+        <item>From four prev. zooms</item>
+        <item>From five prev. zooms</item>
+    </string-array>
+    <string-array name="prevz_pref_title1">
+        <item>Don't use</item>
+        <item>From previous only</item>
+        <item>From two prev. zooms</item>
+        <item>From three prev. zooms</item>
+        <item>From four prev. zooms</item>
+        <item>From five prev. zooms</item>
+    </string-array>
 
 </resources>

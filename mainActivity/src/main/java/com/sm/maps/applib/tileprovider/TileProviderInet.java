@@ -118,22 +118,20 @@ public class TileProviderInet extends TileProviderBase {
 
                         bmp = null;
 
-                        if (mCacheProvider != null) {
-                            if (!mReloadTileMode) {
+                        if (mCacheProvider != null && getTileSource().mOnlineMapCacheEnabled) {
 
-                                data = mCacheProvider.getTile(xyz.TILEURL, xyz.X, xyz.Y, xyz.Z);
+                            data = mCacheProvider.getTile(xyz.TILEURL, xyz.X, xyz.Y, xyz.Z);
 
-                                if (data != null && !isBlank(data)) {
+                            if (data != null && !isBlank(data)) {
 
-                                    try {
-                                        bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-                                    } catch (Throwable e) {
-                                        bmp = null;
-                                    }
+                                try {
+                                    bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+                                } catch (Throwable e) {
+                                    bmp = null;
+                                }
 
-                                    if (bmp == null) {
-                                        mCacheProvider.deleteTile(xyz.TILEURL, xyz.X, xyz.Y, xyz.Z);
-                                    }
+                                if (bmp == null) {
+                                    mCacheProvider.deleteTile(xyz.TILEURL, xyz.X, xyz.Y, xyz.Z);
                                 }
                             }
                         }
@@ -144,11 +142,13 @@ public class TileProviderInet extends TileProviderBase {
                             } else bmp.recycle();
                         }
 
-                        if (bmp == null) {
-                            synchronized (mPendCache2Req) {
-                                if (!mPendCache2Req.containsKey(xyz.TILEURL)) {
-                                    mPendCache2Req.put(xyz.TILEURL, xyz);
-                                    mPendCache2Req.notifyAll();
+                        if (bmp == null || xyz.mReload) {
+                            if (getTileSource().mPrevZCached != 0 && getTileSource().mOnlineMapCacheEnabled && mCacheProvider != null) {
+                                synchronized (mPendCache2Req) {
+                                    if (!mPendCache2Req.containsKey(xyz.TILEURL)) {
+                                        mPendCache2Req.put(xyz.TILEURL, xyz);
+                                        mPendCache2Req.notifyAll();
+                                    }
                                 }
                             }
                             synchronized (mPendTileReq) {
@@ -252,7 +252,7 @@ public class TileProviderInet extends TileProviderBase {
 //                                    }
 //                                }
                             }
-                        } while (zbmp == null && z > 0 && az <= 4);
+                        } while (zbmp == null && z > 0 && az < getTileSource().mPrevZCached);
 
                         if (zbmp != null) {
 
@@ -396,8 +396,8 @@ public class TileProviderInet extends TileProviderBase {
             }
 
             // Add to cache (on SD card)
-			if (mCacheProvider != null && (bmp != null || (data != null && blank))) {
-				if (mReloadTileMode)
+			if (mCacheProvider != null && getTileSource().mOnlineMapCacheEnabled && (bmp != null || (data != null && blank))) {
+				if (mXYZ.mReload)
 					mCacheProvider.deleteTile(mXYZ.TILEURL, mXYZ.X, mXYZ.Y, mXYZ.Z);
 				try {
 					mCacheProvider.putTile(mXYZ.TILEURL, mXYZ.X, mXYZ.Y, mXYZ.Z, data);
@@ -405,7 +405,7 @@ public class TileProviderInet extends TileProviderBase {
 				}
 			}
 
-			if (bmp == null) {
+			if (bmp == null && getTileSource().mPrevZInet != 0) {
 			    // attempt to download from smaller zoom
                 Bitmap zbmp = null;
                 Bitmap tbmp;
@@ -441,9 +441,9 @@ public class TileProviderInet extends TileProviderBase {
                                 zbmp = null;
                             }
 
-                        if (mCacheProvider != null && (zbmp != null || (data != null && blank))) {
+                        if (mCacheProvider != null && getTileSource().mOnlineMapCacheEnabled && (zbmp != null || (data != null && blank))) {
                             // Add to cache (on SD card)
-                            if (mReloadTileMode)
+                            if (mXYZ.mReload)
                                 mCacheProvider.deleteTile(prevZURL, x, y, z);
                             try {
                                 mCacheProvider.putTile(prevZURL, x, y, z, data);
@@ -452,7 +452,7 @@ public class TileProviderInet extends TileProviderBase {
                         }
 
                     }
-                } while (zbmp == null && z > 0 && az <= 4);
+                } while (zbmp == null && z > 0 && az < getTileSource().mPrevZInet);
 
                 if (zbmp != null) {
                     x = (zbmp.getWidth() / (1 << az)) * xm;
@@ -475,7 +475,7 @@ public class TileProviderInet extends TileProviderBase {
                         }
                     } else zbmp.recycle();
 			    }
-            } else {
+            } else if (bmp != null) {
                 if (!mTileCache.putTile(mXYZ.TILEURL, bmp, MapTileMemCache.SRC_INET, false, null))
                     bmp.recycle();
             }

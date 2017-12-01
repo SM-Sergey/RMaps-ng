@@ -237,7 +237,6 @@
             android:summary="@string/pref_onlinecache_summary"
             android:title="@string/pref_onlinecache" >
         </CheckBoxPreference>
-        
         <ListPreference
             android:defaultValue="2"
             android:entries="@array/memcache_pref_title"
@@ -246,7 +245,22 @@
             android:summary="@string/pref_memcache_summary"
             android:title="@string/pref_memcache" >
         </ListPreference>
-        
+        <ListPreference
+            android:defaultValue="4"
+            android:entries="@array/prevz_pref_title"
+            android:entryValues="@array/prevz_pref_values"
+            android:key="pref_prevz_cached"
+            android:summary="@string/pref_prevz_cached_summary"
+            android:title="@string/pref_prevz_cached" >
+        </ListPreference>
+        <ListPreference
+            android:defaultValue="4"
+            android:entries="@array/prevz_pref_title1"
+            android:entryValues="@array/prevz_pref_values1"
+            android:key="pref_prevz_inet"
+            android:summary="@string/pref_prevz_inet_summary"
+            android:title="@string/pref_prevz_inet" >
+        </ListPreference>
     </PreferenceCategory>
 
 </PreferenceScreen>

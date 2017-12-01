@@ -160,6 +160,10 @@ All rights reserved\n
   <string name="pref_onlinecache_summary">Сохранять тайлы онлайн карт на sd карте</string>
   <string name="pref_memcache">Кэш тайлов в памяти</string>
   <string name="pref_memcache_summary">Размер кэша тайлов в кол-вах тайлов на экране</string>
+  <string name="pref_prevz_cached">Тайлы из меньших масштабов (кэш, оффлайн)</string>
+  <string name="pref_prevz_cached_summary">Если в кэше или оффлайн-карте нет тайла для текущего масштаба, пытаться брать тайлы из N предыдущих масштабов и увеличивать их.</string>
+  <string name="pref_prevz_inet">Тайлы из меньших масштабов (онлайн)</string>
+  <string name="pref_prevz_inet_summary">Если в онлайн-источнике карт нет тайла для текущего масштаба, пытаться брать тайлы из N предыдущих масштабов и увеличивать их.</string>
   <string name="message_wait">Подождите минутку, пожалуйста...</string>
   <string name="pref_dir">Папки</string>
   <string name="pref_dir_main">Основная папка RMaps</string>

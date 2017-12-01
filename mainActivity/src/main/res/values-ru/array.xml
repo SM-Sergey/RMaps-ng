@@ -115,4 +115,20 @@
         <item>9 (быстро, но может "падать")</item>
         <item>10</item>
     </string-array>
+    <string-array name="prevz_pref_title">
+        <item>Не брать</item>
+        <item>Только из предыдущего</item>
+        <item>Из двух предыдущих</item>
+        <item>Из трех предыдущих</item>
+        <item>Из четырех предыдущих</item>
+        <item>Из пяти предыдущих</item>
+    </string-array>
+    <string-array name="prevz_pref_title1">
+        <item>Не брать</item>
+        <item>Только из предыдущего</item>
+        <item>Из двух предыдущих</item>
+        <item>Из трех предыдущих</item>
+        <item>Из четырех предыдущих</item>
+        <item>Из пяти предыдущих</item>
+    </string-array>
 </resources>

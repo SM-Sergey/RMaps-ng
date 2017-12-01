@@ -226,7 +226,7 @@ public class TileSource extends TileSourceBase {
 	}
 	
 	public void setReloadTileMode(boolean reloadTileMode) {
-		mTileProvider.mReloadTileMode = reloadTileMode;
+		mTileProvider.setReloadTileMode(reloadTileMode);
 	}
 
 	public Bitmap getTile(final int x, final int y, final int z) {

@@ -128,4 +128,10 @@ public class TileProviderDual extends TileProviderBase {
 		mTileProviderLayer.removeTileFromCache(x, y, z);
 	}
 
+	@Override
+	public void setReloadTileMode(boolean mode) {
+		super.setReloadTileMode(mode);
+		mTileProviderLayer.setReloadTileMode(mode);
+		mTileProviderMap.setReloadTileMode(mode);
+	}
 }
