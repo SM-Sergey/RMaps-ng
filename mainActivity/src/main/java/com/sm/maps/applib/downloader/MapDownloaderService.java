@@ -363,6 +363,7 @@ public class MapDownloaderService extends Service {
 			
 			XYZ tileParam = null;
 			boolean continueExecute = true;
+			int tileCnt = 0;
 			
 			while (continueExecute && !mThreadPool.isShutdown()) {
 				synchronized (mTileIterator) {
@@ -396,6 +397,8 @@ public class MapDownloaderService extends Service {
 				            if(connection.getResponseCode() != 200)
 								Ut.appendLog(mLogFileName, String.format("%tc %s\n	Response: %d %s", System.currentTimeMillis(), tileParam.realURL, connection.getResponseCode(), connection.getResponseMessage()));
 
+				            tileCnt = tileCnt + 1;
+
 							in = new BufferedInputStream(url.openStream(), StreamUtils.IO_BUFFER_SIZE);
 							
 							final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
@@ -428,6 +431,11 @@ public class MapDownloaderService extends Service {
 						if (in != null) StreamUtils.closeStream(in);
 						if (out != null) StreamUtils.closeStream(out);
 						if (connection != null) connection.disconnect();
+					}
+
+					if (tileCnt == 1000) {
+						tileCnt = 0;
+						System.gc();
 					}
 					
 				}
