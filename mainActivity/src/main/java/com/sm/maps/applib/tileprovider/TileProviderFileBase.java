@@ -19,7 +19,7 @@ public class TileProviderFileBase extends TileProviderBase {
 	private static final String INDEX_DB = "/index.db";
 	
 	public TileProviderFileBase(Context ctx, TileSource tileSource) {
-		super(ctx, tileSource);
+		super(ctx, tileSource, SRC_OFFLINE);
 		this.mIndexDatabase = getIndexDatabase(ctx);
 	}
 	

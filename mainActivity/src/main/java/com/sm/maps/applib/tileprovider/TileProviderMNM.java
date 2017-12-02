@@ -27,7 +27,6 @@ import com.sm.maps.applib.utils.SimpleThreadFactory;
 import com.sm.maps.applib.utils.Ut;
 
 public class TileProviderMNM extends TileProviderFileBase {
-	private ExecutorService mThreadPool = Executors.newSingleThreadExecutor(new SimpleThreadFactory("TileProviderTAR"));
 	private File mMapFile;
 	private String mMapID;
 	private ProgressDialog mProgressDialog;
@@ -169,7 +168,6 @@ public class TileProviderMNM extends TileProviderFileBase {
 	@Override
 	public void Free() {
 		Ut.d("TileProviderMNM Free");
-		mThreadPool.shutdown();
 		super.Free();
 	}
 
@@ -199,68 +197,55 @@ public class TileProviderMNM extends TileProviderFileBase {
 
 	public void updateMapParams(TileSource tileSource) {
 		tileSource.ZOOM_MINLEVEL = ZoomMinInCashFile(mMapID);
-		tileSource.ZOOM_MAXLEVEL = ZoomMaxInCashFile(mMapID);
+		tileSource.ZOOM_MAXDNLD = ZoomMaxInCashFile(mMapID);
+		tileSource.ZOOM_MAXLEVEL = Math.min(19, tileSource.ZOOM_MAXDNLD + tileSource.mPrevZCached);
 	}
-	
-	public Bitmap getTile(final int x, final int y, final int z) {
-		final String tileurl = mTileURLGenerator.Get(x, y, z);
+
+	@Override
+	protected byte[] getSingleTile(int x, int y, int z) {
+
+		byte[] data = null;
 		FileInputStream stream;
+
 		try {
 			stream = new FileInputStream(mMapFile);
 		} catch (FileNotFoundException e1) {
-			return mLoadingMapTile;
+			return null;
 		}
 		final InputStream in = new BufferedInputStream(stream, 8192);
-		
-		final Bitmap bmp = mTileCache.getMapTile(tileurl);
-		if(bmp != null)
-			return bmp;
-		
-		if (this.mPending.contains(tileurl))
-			return super.getTile(x, y, z);
-		
-		mPending.add(tileurl);
-		
-		this.mThreadPool.execute(new Runnable() {
-			public void run() {
-				OutputStream out = null;
-				try {
-					Param4ReadData Data = new Param4ReadData(0, 0);
-					final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-					if(findMnmIndex(x, y, z, Data)) {
-						out = new BufferedOutputStream(dataStream, StreamUtils.IO_BUFFER_SIZE);
-	
-						byte[] tmp = new byte[Data.size];
-						in.skip(Data.offset);
-						int read = in.read(tmp);
-						if (read > 0) {
-							out.write(tmp, 0, read);
-						}
-						out.flush();
-	
-						final byte[] data = dataStream.toByteArray();
-						final Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-						mTileCache.putTile(tileurl, bmp);
-	
-						SendMessageSuccess();
-					}
 
-				} catch (OutOfMemoryError e) {
-					SendMessageFail();
-					System.gc();
-				} catch (Exception e) {
-					SendMessageFail();
-				} finally {
-					StreamUtils.closeStream(in);
-					StreamUtils.closeStream(out);
+		OutputStream out = null;
+		try {
+			Param4ReadData Data = new Param4ReadData(0, 0);
+			final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+			if(findMnmIndex(x, y, z, Data)) {
+				out = new BufferedOutputStream(dataStream, StreamUtils.IO_BUFFER_SIZE);
+
+				byte[] tmp = new byte[Data.size];
+				in.skip(Data.offset);
+				int read = in.read(tmp);
+				if (read > 0) {
+					out.write(tmp, 0, read);
 				}
+				out.flush();
 
-				mPending.remove(tileurl);
+				data = dataStream.toByteArray();
+
+				SendMessageSuccess();
 			}
-		});
-		
-		
-		return mLoadingMapTile;
+
+		} catch (OutOfMemoryError e) {
+			System.gc();
+		} catch (Exception e) {
+		} finally {
+			StreamUtils.closeStream(in);
+			if (out != null) StreamUtils.closeStream(out);
+		}
+		return data;
+	}
+
+	public Bitmap getTile(final int x, final int y, final int z) {
+		return getTileFromSource(x, y, z);
 	}
 	
 }

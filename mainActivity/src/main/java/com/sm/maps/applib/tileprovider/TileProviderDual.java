@@ -15,7 +15,7 @@ public class TileProviderDual extends TileProviderBase {
 
 	public TileProviderDual(Context ctx, String aName, TileProviderBase aTileProviderMap, TileProviderBase aTileProviderLayer, MapTileMemCache aTileCache, TileSource tileSource) {
 
-		super(ctx, tileSource);
+		super(ctx, tileSource, SRC_WRAPPER);
 		mTileCache = aTileCache;
 		mTileProviderMap = aTileProviderMap;
 		mTileProviderLayer = aTileProviderLayer;

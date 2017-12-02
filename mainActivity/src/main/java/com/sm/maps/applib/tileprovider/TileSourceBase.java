@@ -157,8 +157,8 @@ public class TileSourceBase {
 			this.BASEURL = pref.getString(prefix + BASEURL_, NO_BASEURL);
 			this.BLANKTILE = null;
 			this.ZOOM_MINLEVEL = 0;
-			this.ZOOM_MAXLEVEL = 24;
-			this.ZOOM_MAXDNLD = 24;
+			this.ZOOM_MAXLEVEL = 19;
+			this.ZOOM_MAXDNLD = 19;
 			this.MAPTILE_SIZE_FACTOR = Double.parseDouble(pref.getString(prefix + STRETCH_, STRING_1)); 
 			this.MAPTILE_SIZEPX = (int) (256 * MAPTILE_SIZE_FACTOR);
 			this.URL_BUILDER_TYPE = 0;

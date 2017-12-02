@@ -155,7 +155,7 @@ public class TileSource extends TileSourceBase {
 			provider.updateMapParams(this);
 			break;
 		default:
-			provider = new TileProviderBase(ctx, this);
+			provider = new TileProviderBase(ctx, this, TileProviderBase.SRC_WRAPPER);
 		}
 			
 		return provider;

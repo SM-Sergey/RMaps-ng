@@ -22,7 +22,6 @@ import com.sm.maps.applib.utils.SimpleThreadFactory;
 import com.sm.maps.applib.utils.Ut;
 
 public class TileProviderSQLITEDB extends TileProviderFileBase {
-	private ExecutorService mThreadPool = Executors.newSingleThreadExecutor(new SimpleThreadFactory("TileProviderSQLITEDB"));
 	private SQLiteMapDatabase mUserMapDatabase;
 	private String mMapID;
 	private ProgressDialog mProgressDialog;
@@ -34,69 +33,22 @@ public class TileProviderSQLITEDB extends TileProviderFileBase {
 		mUserMapDatabase = new SQLiteMapDatabase();
 		mUserMapDatabase.setFile(filename);
 		mMapID = mapid;
-		
+
 		final File file = new File(filename);
-		Ut.d("TileProviderSQLITEDB: mapid = "+mapid);
-		Ut.d("TileProviderSQLITEDB: filename = "+filename);
-		Ut.d("TileProviderSQLITEDB: file.exists = "+file.exists());
-		Ut.d("TileProviderSQLITEDB: getRMapsMapsDir = "+Ut.getRMapsMapsDir(ctx));
-		if(needIndex(mapid, file.length(), file.lastModified(), false)) {
+		Ut.d("TileProviderSQLITEDB: mapid = " + mapid);
+		Ut.d("TileProviderSQLITEDB: filename = " + filename);
+		Ut.d("TileProviderSQLITEDB: file.exists = " + file.exists());
+		Ut.d("TileProviderSQLITEDB: getRMapsMapsDir = " + Ut.getRMapsMapsDir(ctx));
+		if (needIndex(mapid, file.length(), file.lastModified(), false)) {
 			mProgressDialog = Ut.ShowWaitDialog(ctx, R.string.message_updateminmax);
 			new IndexTask().execute(file.length(), file.lastModified());
 		}
-		
-		this.mThreadPool.execute(new Runnable() {
-			public void run() {
-				XYZ xyz = null;
-				Collection<XYZ> col = null;
-				Iterator<XYZ> it = null;
-				byte[] data = null;
-				Bitmap bmp = null;
-				
-				while(!mThreadPool.isShutdown()) {
-					synchronized(mPending2) {
-						col = mPending2.values();
-						it = col.iterator();
-						if (it.hasNext()) 
-							xyz = it.next();
-						else
-							xyz = null;
-					}
-					
-					if(xyz == null) {
-						synchronized(mPending2) {
-							try {
-								SendMessageSuccess();
-								mPending2.wait();
-							} catch (InterruptedException e) {
-							}
-						}
-					}
-					else {
-						data = mUserMapDatabase.getTile(xyz.X, xyz.Y, xyz.Z);
-						
-						if (data != null) {
-							try {
-								bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-								mTileCache.putTile(xyz.TILEURL, bmp);
-							} catch (Throwable e) {
-								e.printStackTrace();
-							}
-						}
-							
-						synchronized(mPending2) {
-							mPending2.remove(xyz.TILEURL);
-						}
-					}
-					
-				}
-			}
-		});
 	}
-	
+
 	public void updateMapParams(TileSource tileSource) {
 		tileSource.ZOOM_MINLEVEL = ZoomMinInCashFile(mMapID);
-		tileSource.ZOOM_MAXLEVEL = ZoomMaxInCashFile(mMapID);
+		tileSource.ZOOM_MAXDNLD = ZoomMaxInCashFile(mMapID);
+		tileSource.ZOOM_MAXLEVEL = Math.min(19, tileSource.ZOOM_MAXDNLD + tileSource.mPrevZCached);
 	}
 	
 	private class IndexTask extends AsyncTask<Long, Void, Boolean> {
@@ -137,54 +89,27 @@ public class TileProviderSQLITEDB extends TileProviderFileBase {
 	}
 
 	@Override
-	public void Free() {
-		mThreadPool.shutdown();
-		synchronized(mPending2) {
-			mPending2.notify();
+	protected byte[] getSingleTile(int x, int y, int z) {
+		byte [] data = null;
+		try {
+			data = mUserMapDatabase.getTile(x, y, z);
+		} catch (Exception e) {
 		}
-		mUserMapDatabase.Free();
-		super.Free();
+		return data;
 	}
 
-	private HashMap<String, XYZ> mPending2 = new HashMap<String, XYZ>();
-	
-	private class XYZ {
-		public String TILEURL;
-		public int X;
-		public int Y;
-		public int Z;
-		
-		public XYZ(final String tileurl, final int x, final int y, final int z) {
-			TILEURL = tileurl;
-			X = x;
-			Y = y;
-			Z = z;
-		}
+	@Override
+	public void Free() {
+		super.Free();
+		mUserMapDatabase.Free();
 	}
-	
+
 	public Bitmap getTile(final int x, final int y, final int z) {
-		final String tileurl = mTileURLGenerator.Get(x, y, z);
-		
-		final Bitmap bmp = mTileCache.getMapTile(tileurl);
-		if(bmp != null)
-			return bmp;
-		
-		synchronized(mPending2) {
-			if (this.mPending2.containsKey(tileurl))
-				return mLoadingMapTile;
-		}
-		
-		synchronized(mPending2) {
-			mPending2.put(tileurl, new XYZ(tileurl, x, y, z));
-			mPending2.notify();
-		}
-		
-		return mLoadingMapTile;
+		return getTileFromSource(x, y, z);
 	}
 
 	public int[] findTheMap(int zoomLevel) {
 		return mUserMapDatabase.findTheMap(zoomLevel);
 	}
-
 
 }
