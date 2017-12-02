@@ -41,23 +41,34 @@ public class TileURLGeneratorBase {
 		return result;
 	}
 
-	final private static String R0 = "{r0}";
-	final private static String R1 = "{r1}";
-	final private static String R3 = "{r3}";
-	final private static String RA = "{ra}";
-	final private static String RB = "{rb}";
+	final private static String R03 = "{r03}";
+	final private static String R12 = "{r12}";
+	final private static String R14 = "{r14}";
+	final private static String R02 = "{r02}";
+	final private static String R13 = "{r13}";
+	final private static String RAD = "{rad}";
+	final private static String RAB = "{rab}";
+	final private static String RAC = "{rac}";
+	final private static String RXY = "{rxy}";
 	final private static String[] abcd = {"a","b","c","d"};
 
-	public String getRealURL(String url){
+	public String getRealURL(String url, int x, int y){
 		final int rn = (int)Math.floor((Math.random() * 4.0f));
 		final int r3 = (int)Math.floor((Math.random() * 3.0f));
 		final int rb = (int)Math.floor((Math.random() * 2.0f));
+		final int xy = x%4 + (y%4)*4;
 
-		return url.replace(R0, Integer.toString(rn))
-				.replace(R1, Integer.toString(rn+1))
-				.replace(R3, Integer.toString(r3))
-				.replace(RA, abcd[rn])
-				.replace(RB, abcd[rb]);
+		return url.replace(R03, Integer.toString(rn))
+				.replace(R14, Integer.toString(rn+1))
+				.replace(R12, Integer.toString(rb+1))
+				.replace(R02, Integer.toString(r3))
+				.replace(R13, Integer.toString(r3+1))
+				.replace(RAD, abcd[rn])
+				.replace(RAB, abcd[rb])
+				.replace(RAC, abcd[r3])
+				.replace(RXY, Integer.toString(xy))
+
+				;
 
 	}
 

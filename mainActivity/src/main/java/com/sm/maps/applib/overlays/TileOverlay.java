@@ -166,6 +166,8 @@ public class TileOverlay extends TileViewOverlay implements OpenStreetMapConstan
 								c.drawLine(tileLeft, tileTop, tileLeft, tileTop + tileSizePx, mPaint);
 								c.drawText("y x = " + mapTileCoords[LATITUDE] + " " + mapTileCoords[LONGITUDE] + " zoom " + tileView.getZoomLevel() + " ", tileLeft + 5,
 										tileTop + 15, mPaint);
+								c.drawText(this.mTileSource.getTileURL(mapTileCoords[LONGITUDE], mapTileCoords[LATITUDE], tileView.getZoomLevel()),
+										 tileLeft + 5, tileTop + 40, mPaint);
 							}
 
 						}

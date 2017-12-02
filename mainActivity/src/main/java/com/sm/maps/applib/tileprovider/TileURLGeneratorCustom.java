@@ -9,6 +9,7 @@ public class TileURLGeneratorCustom extends TileURLGeneratorBase {
 	private final static String Z = "{z}";
 	private final static String ZP = "{z+1}";
 	private final static String ZM = "{z-1}";
+	private final static String ZR = "{17-z}";
 	private final static String strGalileo = "Galileo";
 	private final static String GALILEO = "{galileo}";
 
@@ -38,6 +39,7 @@ public class TileURLGeneratorCustom extends TileURLGeneratorBase {
 				.replace(Z, Integer.toString(z))
 				.replace(ZP, Integer.toString(z+1))
 				.replace(ZM, Integer.toString(z-1))
+				.replace(ZR, Integer.toString(17-z))
 				.replace(GALILEO, strGalileo.substring(0, (x*3+y)% 8))
 				;
 	}

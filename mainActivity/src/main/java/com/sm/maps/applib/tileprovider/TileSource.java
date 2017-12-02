@@ -206,6 +206,9 @@ public class TileSource extends TileSourceBase {
 				generator = new TileURLGeneratorCustom(tileSource.BASEURL);
 				break;
 			case 13:
+				generator = new TileURLGeneratorEAtlas(tileSource.BASEURL, tileSource.IMAGE_FILENAMEENDING);
+				break;
+			default:
 				generator = null;
 				break;
 			}
@@ -231,6 +234,10 @@ public class TileSource extends TileSourceBase {
 
 	public Bitmap getTile(final int x, final int y, final int z) {
 		return mTileProvider.getTile(x, y, z);
+	}
+
+	public String getTileURL (final int x, final int y, final int z) {
+	   return mTileProvider.mTileURLGenerator.getRealURL(mTileProvider.mTileURLGenerator.Get(x,y,z),x,y);
 	}
 
 	public void Free() {

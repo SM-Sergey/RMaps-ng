@@ -377,7 +377,7 @@ public class MapDownloaderService extends Service {
 				
 				if (tileParam != null) {
 					tileParam.TILEURL = mTileSource.getTileURLGenerator().Get(tileParam.X, tileParam.Y, tileParam.Z);
-					tileParam.realURL = mTileSource.getTileURLGenerator().getRealURL(tileParam.TILEURL);
+					tileParam.realURL = mTileSource.getTileURLGenerator().getRealURL(tileParam.TILEURL, tileParam.X, tileParam.Y);
 					InputStream in = null;
 					OutputStream out = null;
 					HttpURLConnection connection = null;

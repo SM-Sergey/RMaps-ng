@@ -461,7 +461,7 @@ public class TileProviderBase {
 			if (mXYZ.Z <= getTileSource().ZOOM_MAXDNLD) {
 				do {
 					try {
-						data = getSingleTile(mTileURLGenerator.getRealURL(mXYZ.TILEURL));
+						data = getSingleTile(mTileURLGenerator.getRealURL(mXYZ.TILEURL, mXYZ.X, mXYZ.Y));
 					} catch (Exception e) {
 						data = null;
 					}
@@ -512,7 +512,7 @@ public class TileProviderBase {
 
 						data = null;
 						try {
-							data = getSingleTile(mTileURLGenerator.getRealURL(prevZURL));
+							data = getSingleTile(mTileURLGenerator.getRealURL(prevZURL,x,y));
 						} catch (Exception e) {
 						}
 
