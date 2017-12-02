@@ -37,6 +37,9 @@ public class TileOverlay extends TileViewOverlay implements OpenStreetMapConstan
 	private IMoveListener mMoveListener;
 	private int mCacheMult;
 	private int mLastTiles = 0;
+	private int mLastRX = 3;
+	private int mLastRY = 3;
+
 
 	public TileOverlay(TileView tileView, boolean asOverlay) {
 		super();
@@ -116,19 +119,31 @@ public class TileOverlay extends TileViewOverlay implements OpenStreetMapConstan
 			final int[] mapTileCoords = new int[] {
 					centerMapTileCoords[LATITUDE],
 					centerMapTileCoords[LONGITUDE] };
-			
-			boolean tileIn = true;
-			int x = 0, y = 0, radius = 0, tilecnt = 0;
+
+			int x, y, r = 0, tilecnt = 0;
 			mMatrixBearing.reset();
 			mMatrixBearing.setRotate(360 - tileView.getBearing(), tileView.getWidth() / 2, tileView.getHeight() / 2);
-			
-			while (tileIn) {
-				tileIn = false;
+
+			int RX = ( (tileView.getWidth()+1)/2 + tileSizePx - 1) / tileSizePx;
+			int RY = ( (tileView.getHeight()+1)/2 + tileSizePx - 1) / tileSizePx;
+
+			if (tileView.mInZoom) {
+				if (RX > mLastRX) RX = mLastRX;
+				if (RY > mLastRY) RY = mLastRY;
+			} else {
+				mLastRX = RX;
+				mLastRY = RY;
+			}
+
+			while (r <= RX || r <= RY) {
 				
-				for(x = -radius; x <= radius; x++) {
-					for(y = -radius; y <= radius; y++) {
-						if(x != -radius && x != radius && y != -radius && y != radius) continue;
-						
+				for(x = -r; x <= r; x++) {
+					for(y = -r; y <= r; y++) {
+
+						if(x != -r && x != r && y != -r && y != r) continue;
+
+						if (x < -RX || x > RX || y < -RY || y > RY ) continue;
+
 						mapTileCoords[LATITUDE] = MyMath.mod(centerMapTileCoords[LATITUDE] + y, mapTileUpperBound);
 						mapTileCoords[LONGITUDE] = MyMath.mod(centerMapTileCoords[LONGITUDE] + x, mapTileUpperBound);
 
@@ -138,38 +153,27 @@ public class TileOverlay extends TileViewOverlay implements OpenStreetMapConstan
 
 						float arr[] = {mRectDraw.left, mRectDraw.top, mRectDraw.right, mRectDraw.top, mRectDraw.right, mRectDraw.bottom, mRectDraw.left, mRectDraw.bottom, mRectDraw.left, mRectDraw.top};
 						mMatrixBearing.mapPoints(arr);
-						
-						if(
-//								Ut.Algorithm.isIntersected((int)(tileView.getWidth()*(1-tileView.getTouchScale())/2),
-//													  (int)(tileView.getHeight()*(1-tileView.getTouchScale())/2),
-//													  (int)(tileView.getWidth()*(1+tileView.getTouchScale())/2),
-//								                      (int)(tileView.getHeight()*(1+tileView.getTouchScale())/2), arr)
-								Ut.Algorithm.isIntersected( 0,
-															0,
-															(int)(tileView.getWidth()),
-															(int)(tileView.getHeight()), arr)
-								) {
-							tileIn = true;
-							tilecnt++;
-							
-							final Bitmap currentMapTile = this.mTileSource.getTile(mapTileCoords[LONGITUDE], mapTileCoords[LATITUDE], tileView.getZoomLevel());
-							if (currentMapTile != null) {
-								if (!currentMapTile.isRecycled())
-									c.drawBitmap(currentMapTile, null, mRectDraw, mPaint);
 
-								if (tileView.mDrawTileGrid || OpenStreetMapViewConstants.DEBUGMODE) {
-									c.drawLine(tileLeft, tileTop, tileLeft + tileSizePx, tileTop, mPaint);
-									c.drawLine(tileLeft, tileTop, tileLeft, tileTop + tileSizePx, mPaint);
-									c.drawText("y x = " + mapTileCoords[LATITUDE] + " " + mapTileCoords[LONGITUDE] + " zoom " + tileView.getZoomLevel() + " ", tileLeft + 5,
-											tileTop + 15, mPaint);
-								}
+						tilecnt++;
 
+						final Bitmap currentMapTile = this.mTileSource.getTile(mapTileCoords[LONGITUDE], mapTileCoords[LATITUDE], tileView.getZoomLevel());
+						if (currentMapTile != null) {
+							if (!currentMapTile.isRecycled())
+								c.drawBitmap(currentMapTile, null, mRectDraw, mPaint);
+
+							if (tileView.mDrawTileGrid || OpenStreetMapViewConstants.DEBUGMODE) {
+								c.drawLine(tileLeft, tileTop, tileLeft + tileSizePx, tileTop, mPaint);
+								c.drawLine(tileLeft, tileTop, tileLeft, tileTop + tileSizePx, mPaint);
+								c.drawText("y x = " + mapTileCoords[LATITUDE] + " " + mapTileCoords[LONGITUDE] + " zoom " + tileView.getZoomLevel() + " ", tileLeft + 5,
+										tileTop + 15, mPaint);
 							}
+
 						}
 					}
 				}
 				
-				radius++;
+				r++;
+
 			}
 
 			mLastTiles = tilecnt;

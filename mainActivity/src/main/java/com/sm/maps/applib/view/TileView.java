@@ -60,12 +60,15 @@ public class TileView extends View {
 
 	private final LinkedList<dummy_class> mQueue = new LinkedList<dummy_class>();
 
+	public boolean mInZoom = false;
+
 	private class dummy_class {	}
 
 	private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
 
 		@Override
 		public boolean onScaleBegin(ScaleGestureDetector detector) {
+			mInZoom = true;
 			return super.onScaleBegin(detector);
 		}
 
@@ -73,8 +76,8 @@ public class TileView extends View {
 		public boolean onScale(ScaleGestureDetector detector) {
 			mTouchScale = mPrevScaleFactor*detector.getScaleFactor();
 
-			if (mTouchScale >= 8) mTouchScale = 8;
-			if (mTouchScale <= 1/8) mTouchScale = 1/8;
+			if (mTouchScale >= 11) mTouchScale = 11;
+			if (mTouchScale <= 1/11) mTouchScale = 1/11;
 
 			if(mMoveListener != null)
 				mMoveListener.onZoomDetected();
@@ -103,10 +106,10 @@ public class TileView extends View {
 
 					mTouchScale /= (1 << zc);
 				}
-			} else if (mTouchScale <= (1/1.5)) {
+			} else if (mTouchScale <= 0.75) {
 				if (mTileSource.ZOOM_MINLEVEL != getZoomLevel()) {
-					if (mTouchScale <= 1/6) zc = -3;
-					else if (mTouchScale <= 1/3) zc = -2;
+					if (mTouchScale <= 0.1875) zc = -3;
+					else if (mTouchScale <= 0.375) zc = -2;
 					else zc = -1;
 
 					if (mTileSource.ZOOM_MINLEVEL > (zoom + zc)) {
@@ -117,10 +120,12 @@ public class TileView extends View {
 				}
 			}
 
-			if (mTouchScale < 1/8) mTouchScale = 1/8;
-			if (mTouchScale > 8) mTouchScale = 8;
+			if (mTouchScale < 0.75) mTouchScale = 0.75;
+			if (mTouchScale > 11) mTouchScale = 11;
 
 			mPrevScaleFactor = mTouchScale;
+
+			mInZoom = false;
 
 			if (zc != 0) setZoomLevel(getZoomLevel() + zc, false);
 			else invalidate();

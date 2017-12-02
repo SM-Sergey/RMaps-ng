@@ -124,7 +124,7 @@ public class MapTileMemCache {
 	}
 	
 	public synchronized void Resize(final int size) {
-		if(size != mSize){
+		if(size > mSize){
 			LRUBitmapCache<String, CacheItem> newCache = new LRUBitmapCache<String, CacheItem>(size);
 			newCache.putAll(mHardCachedTiles);
 			mSize = size;
