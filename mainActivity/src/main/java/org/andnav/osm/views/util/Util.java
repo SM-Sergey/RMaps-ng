@@ -45,8 +45,13 @@ public class Util implements OpenStreetMapViewConstants{
 
 		if (aProjection == 3) {
 			final double[] OSRef = OSGB36.LatLon2OSGB(aLat, aLon);
-			out[0] = (int) ((1 - OSRef[0] / 1000000)*OpenSpaceUpperBoundArray[zoom - 7]);
-			out[1] = (int) ((OSRef[1] / 1000000)*OpenSpaceUpperBoundArray[zoom - 7]);
+			out[0] = (int) ((1 - OSRef[0] / 1000000) * OpenSpaceUpperBoundArray[zoom - 7]);
+			out[1] = (int) ((OSRef[1] / 1000000) * OpenSpaceUpperBoundArray[zoom - 7]);
+		} else if (aProjection == 4) {
+			out[MAPTILE_LONGITUDE_INDEX] = (int) ((aLon / 360 + .5) * (1<<zoom));
+			if (out[MAPTILE_LONGITUDE_INDEX] < 0) out[MAPTILE_LONGITUDE_INDEX] += 1 << zoom;
+			final double siny = Math.sin(Math.toRadians(aLat));
+			out[MAPTILE_LATITUDE_INDEX] = (int) ((0.5 * Math.log((1 + siny) / (1 - siny)) / - (2 * Math.PI) + .5) * (1 << zoom));
 		} else {
 			if (aProjection == 1)
 				out[MAPTILE_LATITUDE_INDEX] = (int) Math.floor((1 - Math
