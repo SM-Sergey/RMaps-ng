@@ -16,6 +16,9 @@ import java.util.concurrent.Executors;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
 
@@ -172,32 +175,18 @@ public class TileProviderBase {
 
 								if (zbmp != null) {
 									if (az == 0) {
-										if (mTileCache.putTile(xyz.TILEURL, zbmp, MapTileMemCache.SRC_INET, false, null)) {
+										if (mTileCache.putTile(xyz.TILEURL, zbmp, MapTileMemCache.SRC_INET, false, null))
 											bmpFlag = true;
-										} else zbmp.recycle();
+										else
+											zbmp.recycle();
 									} else {
-										x = (zbmp.getWidth() / (1 << az)) * xm;
-										y = (zbmp.getHeight() / (1 << az)) * ym;
-										tbmp = Bitmap.createBitmap(zbmp, x, y, zbmp.getWidth() / (1 << az), zbmp.getHeight() / (1 << az));
-										if (tbmp != null) {
-											bmp = Bitmap.createScaledBitmap(tbmp, zbmp.getWidth(), zbmp.getHeight(), true);
-
-											if (bmp != null) {
-												Bitmap[] arr = new Bitmap[2];
-												arr[0] = tbmp;
-												arr[1] = zbmp;
-												if (mTileCache.putTile(xyz.TILEURL, bmp, MapTileMemCache.SRC_INET, false, arr)) {
-													bmpFlag = true;
-												} else {
-													bmp.recycle();
-													if (!tbmp.isRecycled()) tbmp.recycle();
-													if (!zbmp.isRecycled()) zbmp.recycle();
-												}
-											} else {
-												if (!tbmp.isRecycled()) tbmp.recycle();
-												if (!zbmp.isRecycled()) zbmp.recycle();
-											}
-										} else zbmp.recycle();
+										bmp = scalePartOfBitmap(zbmp, (zbmp.getWidth() / (1 << az)) * xm, (zbmp.getHeight() / (1 << az)) * ym,
+												zbmp.getWidth() / (1 << az), zbmp.getHeight() / (1 << az),
+												zbmp.getWidth(), zbmp.getHeight());
+										if ( mTileCache.putTile(xyz.TILEURL, bmp, MapTileMemCache.SRC_INET, false, null))
+											bmpFlag = true;
+										else
+											bmp.recycle();
 									}
 								}
 
@@ -338,29 +327,14 @@ public class TileProviderBase {
 							} while (zbmp == null && z > 0 && az < getTileSource().mPrevZCached);
 
 							if (zbmp != null) {
+								bmp = scalePartOfBitmap(zbmp, (zbmp.getWidth() / (1 << az)) * xm, (zbmp.getHeight() / (1 << az)) * ym,
+										zbmp.getWidth() / (1 << az), zbmp.getHeight() / (1 << az),
+										zbmp.getWidth(), zbmp.getHeight());
 
-								x = (zbmp.getWidth() / (1 << az)) * xm;
-								y = (zbmp.getHeight() / (1 << az)) * ym;
-								tbmp = Bitmap.createBitmap(zbmp, x, y, zbmp.getWidth() / (1 << az), zbmp.getHeight() / (1 << az));
-								if (tbmp != null) {
-									bmp = Bitmap.createScaledBitmap(tbmp, zbmp.getWidth(), zbmp.getHeight(), true);
-
-									if (bmp != null) {
-										Bitmap[] arr = new Bitmap[2];
-										arr[0] = tbmp;
-										arr[1] = zbmp;
-										if (mTileCache.putTile(xyz.TILEURL, bmp, MapTileMemCache.SRC_CACHE_SECOND, false, arr)) {
-											bmpFlag = true;
-										} else {
-											bmp.recycle();
-											if (!tbmp.isRecycled()) tbmp.recycle();
-											if (!zbmp.isRecycled()) zbmp.recycle();
-										}
-									} else {
-										if (!tbmp.isRecycled()) tbmp.recycle();
-										if (!zbmp.isRecycled()) zbmp.recycle();
-									}
-								} else zbmp.recycle();
+								if (mTileCache.putTile(xyz.TILEURL, bmp, MapTileMemCache.SRC_CACHE_SECOND, false, null))
+									bmpFlag = true;
+								else
+									bmp.recycle();
 							}
 
 							synchronized (mPendCache2Req) {
@@ -539,25 +513,11 @@ public class TileProviderBase {
 				} while (zbmp == null && z > 0 && az < getTileSource().mPrevZInet);
 
 				if (zbmp != null) {
-					x = (zbmp.getWidth() / (1 << az)) * xm;
-					y = (zbmp.getHeight() / (1 << az)) * ym;
-					tbmp = Bitmap.createBitmap(zbmp, x, y, zbmp.getWidth() / (1 << az), zbmp.getHeight() / (1 << az));
-					if (tbmp != null) {
-						bmp = Bitmap.createScaledBitmap(tbmp, zbmp.getWidth(), zbmp.getHeight(), true);
-						if (bmp != null) {
-							Bitmap[] arr = new Bitmap[2];
-							arr[0] = tbmp;
-							arr[1] = zbmp;
-							if (!mTileCache.putTile(mXYZ.TILEURL, bmp, MapTileMemCache.SRC_INET_SECOND, false, arr)) {
-								bmp.recycle();
-								if (!tbmp.isRecycled()) tbmp.recycle();
-								if (!zbmp.isRecycled()) zbmp.recycle();
-							}
-						} else {
-							tbmp.recycle();
-							if (!zbmp.isRecycled()) zbmp.recycle();
-						}
-					} else zbmp.recycle();
+					bmp = scalePartOfBitmap(zbmp, (zbmp.getWidth() / (1 << az)) * xm, (zbmp.getHeight() / (1 << az)) * ym,
+							zbmp.getWidth() / (1 << az), zbmp.getHeight() / (1 << az),
+							zbmp.getWidth(), zbmp.getHeight());
+					if (!mTileCache.putTile(mXYZ.TILEURL, bmp, MapTileMemCache.SRC_INET_SECOND, false, null))
+						bmp.recycle();
 				}
 			} else if (bmp != null) {
 				if (!mTileCache.putTile(mXYZ.TILEURL, bmp, MapTileMemCache.SRC_INET, false, null))
@@ -771,5 +731,17 @@ public class TileProviderBase {
 
 		return mLoadingMapTile;
 	}
+
+	private Bitmap scalePartOfBitmap(Bitmap bmp, int xSrc, int ySrc, int wSrc, int hSrc, int wDst, int hDst) {
+		Bitmap bmpRet = Bitmap.createBitmap(wDst, hDst, Bitmap.Config.ARGB_8888);
+		Canvas c = new Canvas(bmpRet);
+		Rect src = new Rect(xSrc, ySrc, xSrc + wSrc, ySrc + hSrc);
+		Rect dst = new Rect(0,0, wDst, hDst);
+		Paint paint = new Paint();
+		c.drawBitmap(bmp, src, dst, paint);
+		bmp.recycle();
+		return bmpRet;
+	}
+
 
 }
