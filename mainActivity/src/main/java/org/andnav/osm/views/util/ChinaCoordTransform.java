@@ -49,6 +49,9 @@ public class ChinaCoordTransform {
 	 * @return ??????
 	 */
 	public static double[] gcj02tobd09(double lng, double lat) {
+		if (out_of_china(lng, lat)) {
+			return new double[] { lng, lat };
+		}
 		double z = Math.sqrt(lng * lng + lat * lat) + 0.00002 * Math.sin(lat * x_pi);
 		double theta = Math.atan2(lat, lng) + 0.000003 * Math.cos(lng * x_pi);
 		double bd_lng = z * Math.cos(theta) + 0.0065;
@@ -65,6 +68,9 @@ public class ChinaCoordTransform {
 	 * @return ??????
 	 */
 	public static double[] bd09togcj02(double bd_lon, double bd_lat) {
+		if (out_of_china(bd_lon, bd_lat)) {
+			return new double[] { bd_lon, bd_lat };
+		}
 		double x = bd_lon - 0.0065;
 		double y = bd_lat - 0.006;
 		double z = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * x_pi);

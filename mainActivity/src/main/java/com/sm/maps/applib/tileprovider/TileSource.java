@@ -203,7 +203,7 @@ public class TileSource extends TileSourceBase {
 				generator = new TileURLGeneratorVFRCB(tileSource.BASEURL, tileSource.IMAGE_FILENAMEENDING);
 				break;
 			case 12:
-				generator = new TileURLGeneratorCustom(tileSource.BASEURL);
+				generator = new TileURLGeneratorCustom(tileSource.BASEURL, this);
 				break;
 			case 13:
 				generator = new TileURLGeneratorEAtlas(tileSource.BASEURL, tileSource.IMAGE_FILENAMEENDING);
@@ -260,12 +260,22 @@ public class TileSource extends TileSourceBase {
 	public int getTileSizePx(int mZoom) {
 		return MAPTILE_SIZEPX;
 	}
-	
+
+	// z2...z18
+	private static final int[] baidu_bounds = {1,3,6,12,24,48,77,153,306,612,1224,2446,4892,9784,19568,39136,78272,156544,313086};
+
 	public int getTileUpperBound(final int zoomLevel) {
 //		if (this.URL_BUILDER_TYPE == 5) {
 //			return OpenSpaceUpperBoundArray[zoomLevel - ZOOM_MINLEVEL];
 //		} else
-			return (int) Math.pow(2, zoomLevel);
+		if (this.PROJECTION != 4){
+			return 1 << zoomLevel;
+		} else {
+			if (zoomLevel > 18)
+				return baidu_bounds[18] * (1 << (zoomLevel-18));
+			else
+				return baidu_bounds[zoomLevel];
+		}
 	}
 
 	public void setHandler(Handler mTileMapHandler) {

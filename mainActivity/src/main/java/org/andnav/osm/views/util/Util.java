@@ -41,6 +41,16 @@ public class Util implements OpenStreetMapViewConstants{
 		return getMapTileFromCoordinates(aLat / 1E6, aLon / 1E6, zoom, reuse, aProjection);
 	}
 
+	private static final int[] baidu_bounds = {1,3,6,12,24,48,77,153,306,612,1224,2446,4892,9784,19568,39136,78272,156544,313086};
+
+	private static double baiduBound(int z) {
+		if (z > 18)
+			return baidu_bounds[18] * (1 << (z-18));
+		else
+			return baidu_bounds[z];
+	}
+
+
 	public static int[] getMapTileFromCoordinates(final double aLat, final double aLon, final int zoom, final int[] aUseAsReturnValue, final int aProjection) {
 		final int[] out = (aUseAsReturnValue != null) ? aUseAsReturnValue : new int[2];
 
@@ -49,9 +59,11 @@ public class Util implements OpenStreetMapViewConstants{
 			out[0] = (int) ((1 - OSRef[0] / 1000000) * OpenSpaceUpperBoundArray[zoom - 7]);
 			out[1] = (int) ((OSRef[1] / 1000000) * OpenSpaceUpperBoundArray[zoom - 7]);
 		} else if (aProjection == 4) {
-			double [] baida =  ChinaCoordTransform.wgs84tobd09(aLon, aLat);
-			out[MAPTILE_LATITUDE_INDEX] = (int) Math.floor((1 - Math.log(Math.tan(Math.PI/4 + baida[1] * Math.PI / 360)) / Math.PI) / 2 * (1 << zoom));
-			out[MAPTILE_LONGITUDE_INDEX] = (int) Math.floor((baida[0] + 180) / 360 * (1 << zoom));
+			double [] baida1 = ChinaCoordTransform.wgs84tobd09(aLon, aLat);
+			double [] baida2 = BaiduMercatorProjection.ll2mc(baida1[0], baida1[1], baida1);
+			int z = (18-(zoom + 1));
+			out[MAPTILE_LONGITUDE_INDEX] = (int)(baida2[0])/256/(1<<z) + baidu_bounds[zoom]/2;
+			out[MAPTILE_LATITUDE_INDEX] = (int)(-baida2[1])/256/(1<<z) + baidu_bounds[zoom]/2;
 		} else {
 			if (aProjection == 1)
 				out[MAPTILE_LATITUDE_INDEX] = (int) Math.floor((1 - Math.log(Math.tan(Math.PI/4 + aLat * Math.PI / 360)) / Math.PI) / 2 * (1 << zoom));
@@ -104,11 +116,29 @@ public class Util implements OpenStreetMapViewConstants{
 	private static double[] tile2LatLon (int x, int y, int aZoom, int aProjection) {
 		double[] rv = new double[2];
 
+		if (aProjection == 4) {
+			int z = (18-(aZoom + 1));
+
+			double[] arv = new double[2];
+			// lon
+			arv[0] = (x - baidu_bounds[aZoom]/2)*256*(1<<z);
+			// lat
+			arv[1] = -(y - baidu_bounds[aZoom]/2)*256*(1<<z);
+
+			BaiduMercatorProjection.mc2ll(arv[0], arv[1], arv);
+			arv = ChinaCoordTransform.bd09towgs84(arv[0], arv[1]);
+
+			rv[1] = arv[0];
+			rv[0] = arv[1];
+			return rv;
+		}
+
+
 		double sc = (1 << aZoom);
 
 		rv[1] = ((double)x) / sc * 360.0 - 180;
 
-		if (aProjection == 1 || aProjection == 4) {
+		if (aProjection == 1) {
 			final double n = Math.PI - (2.0 * Math.PI * y / sc);
 			rv[0] = 180.0 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
 		} else {
@@ -127,12 +157,6 @@ public class Util implements OpenStreetMapViewConstants{
 				phi += dphi;
 			}
 			rv[0] = phi / (Math.PI / 180.0);
-		}
-
-		if (aProjection == 4) {
-			double [] arv = ChinaCoordTransform.bd09towgs84(rv[1], rv[0]);
-			rv[1] = arv[0];
-			rv[0] = arv[1];
 		}
 
 		return rv;

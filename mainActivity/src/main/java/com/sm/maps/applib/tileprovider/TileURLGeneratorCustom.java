@@ -1,5 +1,7 @@
 package com.sm.maps.applib.tileprovider;
 
+import com.sm.maps.applib.tileprovider.TileSource;
+
 public class TileURLGeneratorCustom extends TileURLGeneratorBase {
 	private final static String X = "{x}";
 	private final static String Y = "{y}";
@@ -13,21 +15,20 @@ public class TileURLGeneratorCustom extends TileURLGeneratorBase {
 	private final static String strGalileo = "Galileo";
 	private final static String GALILEO = "{galileo}";
 
-	public TileURLGeneratorCustom(String baseurl) {
+	private TileSource mTileSource;
+
+	public TileURLGeneratorCustom(String baseurl, TileSource aTileSource) {
 		super(baseurl);
-	}
-
-
-	private int mod (int a, int b){
-		int r = a%b;
-		return r < 0 ? r+b : r;
+		mTileSource = aTileSource;
 	}
 
 	@Override
 	public String Get(int x, int y, int z) {
 
-		int bx = x - (1 << (z-1));
-		int by = (1 << z) - 1 - y - (1 << (z-1));
+
+
+		int bx = x - mTileSource.getTileUpperBound(z)/2;
+		int by = mTileSource.getTileUpperBound(z)/2 - y;
 
 		return getBase()
 				.replace(X, Integer.toString(x))
