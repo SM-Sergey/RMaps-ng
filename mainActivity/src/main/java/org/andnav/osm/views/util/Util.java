@@ -3,6 +3,7 @@ package org.andnav.osm.views.util;
 
 import org.andnav.osm.util.BoundingBoxE6;
 import org.andnav.osm.views.util.constants.OpenStreetMapViewConstants;
+import org.andnav.osm.views.util.ChinaCoordTransform;
 
 import com.sm.maps.applib.utils.OSGB36;
 
@@ -48,17 +49,12 @@ public class Util implements OpenStreetMapViewConstants{
 			out[0] = (int) ((1 - OSRef[0] / 1000000) * OpenSpaceUpperBoundArray[zoom - 7]);
 			out[1] = (int) ((OSRef[1] / 1000000) * OpenSpaceUpperBoundArray[zoom - 7]);
 		} else if (aProjection == 4) {
-			out[MAPTILE_LONGITUDE_INDEX] = (int) ((aLon / 360 + .5) * (1<<zoom));
-			if (out[MAPTILE_LONGITUDE_INDEX] < 0) out[MAPTILE_LONGITUDE_INDEX] += 1 << zoom;
-			final double siny = Math.sin(Math.toRadians(aLat));
-			out[MAPTILE_LATITUDE_INDEX] = (int) ((0.5 * Math.log((1 + siny) / (1 - siny)) / - (2 * Math.PI) + .5) * (1 << zoom));
+			double [] baida =  ChinaCoordTransform.wgs84tobd09(aLon, aLat);
+			out[MAPTILE_LATITUDE_INDEX] = (int) Math.floor((1 - Math.log(Math.tan(Math.PI/4 + baida[1] * Math.PI / 360)) / Math.PI) / 2 * (1 << zoom));
+			out[MAPTILE_LONGITUDE_INDEX] = (int) Math.floor((baida[0] + 180) / 360 * (1 << zoom));
 		} else {
 			if (aProjection == 1)
-				out[MAPTILE_LATITUDE_INDEX] = (int) Math.floor((1 - Math
-						.log(Math.tan(aLat * Math.PI / 180) + 1
-								/ Math.cos(aLat * Math.PI / 180))
-						/ Math.PI)
-						/ 2 * (1 << zoom));
+				out[MAPTILE_LATITUDE_INDEX] = (int) Math.floor((1 - Math.log(Math.tan(Math.PI/4 + aLat * Math.PI / 360)) / Math.PI) / 2 * (1 << zoom));
 			else {
 				final double E2 = (double) aLat * Math.PI / 180;
 				final long sradiusa = 6378137;
@@ -76,15 +72,13 @@ public class Util implements OpenStreetMapViewConstants{
 				out[MAPTILE_LATITUDE_INDEX] = (int) Math.floor(B2 / 2 - M2 * B2
 						/ 2 / Math.PI);
 			}
-
-			out[MAPTILE_LONGITUDE_INDEX] = (int) Math.floor((aLon + 180) / 360
-					* (1 << zoom));
+			out[MAPTILE_LONGITUDE_INDEX] = (int) Math.floor((aLon + 180) / 360 * (1 << zoom));
 		}
 
 		return out;
 	}
 
-	// Conversion of a MapTile to a BoudingBox
+	// Conversion of a MapTile to a BoundingBox
 
 	public static BoundingBoxE6 getBoundingBoxFromMapTile(final int[] aMapTile, final int zoom, final int aProjection) {
 		final int y = aMapTile[MAPTILE_LATITUDE_INDEX];
@@ -100,10 +94,50 @@ public class Util implements OpenStreetMapViewConstants{
 							/ OpenSpaceUpperBoundArray[zoom - 7]), (double)((x + 1) * 1000000
 							/ OpenSpaceUpperBoundArray[zoom - 7]));
 			return new BoundingBoxE6(LatLon1[0], LatLon1[1], LatLon0[0], LatLon0[1]);
-		} else
-			return new BoundingBoxE6(tile2lat(y, zoom, aProjection), tile2lon(x + 1, zoom), tile2lat(y + 1, zoom, aProjection), tile2lon(x, zoom));
+		} else {
+			double[] latLon1 = tile2LatLon(x, y, zoom, aProjection);
+			double[] latLon2 = tile2LatLon(x+1, y+1, zoom, aProjection);
+			return new BoundingBoxE6(latLon1[0], latLon2[1], latLon2[0], latLon1[1]);
+		}
 	}
 
+	private static double[] tile2LatLon (int x, int y, int aZoom, int aProjection) {
+		double[] rv = new double[2];
+
+		double sc = (1 << aZoom);
+
+		rv[1] = ((double)x) / sc * 360.0 - 180;
+
+		if (aProjection == 1 || aProjection == 4) {
+			final double n = Math.PI - (2.0 * Math.PI * y / sc);
+			rv[0] = 180.0 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+		} else {
+			final double y1 = 20037508.342789 * (1 - 2 / sc * y);
+
+			final double r_major = 6378137.0; //Equatorial Radius, WGS84
+			final double r_minor = 6356752.314245179; //defined as constant
+
+			double ts = Math.exp(-y1 / r_major);
+			double phi = Math.PI / 2 - 2 * Math.atan(ts);
+			double dphi = 1.0;
+			int i;
+			for (i = 0; Math.abs(dphi) > 0.000000001 && i < 15; i++) {
+				double con = (Math.sqrt(1.0 - (r_minor / r_major * r_minor / r_major))) * Math.sin(phi);
+				dphi = Math.PI / 2 - 2 * Math.atan(ts * Math.pow((1.0 - con) / (1.0 + con), (0.5 * (Math.sqrt(1.0 - (r_minor / r_major * r_minor / r_major)))))) - phi;
+				phi += dphi;
+			}
+			rv[0] = phi / (Math.PI / 180.0);
+		}
+
+		if (aProjection == 4) {
+			double [] arv = ChinaCoordTransform.bd09towgs84(rv[1], rv[0]);
+			rv[1] = arv[0];
+			rv[0] = arv[1];
+		}
+
+		return rv;
+	}
+	/*
 	private static double tile2lon(int x, int aZoom) {
 		return (x / Math.pow(2.0, aZoom) * 360.0) - 180;
 	}
@@ -114,8 +148,10 @@ public class Util implements OpenStreetMapViewConstants{
 			final double n = Math.PI - ((2.0 * Math.PI * y) / Math.pow(2.0, aZoom));
 			//final double n1 = 180.0 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
 			return 180.0 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
-			
+
 			//return 180 / Math.PI * (2 * Math.atan(Math.exp(a*Math.PI/180)) - Math.PI/2); // http://wiki.openstreetmap.org/wiki/Mercator
+		} else if (aProjection == 4) {
+
 		} else {
 			final double y1 = 20037508.342789 - 20037508.342789 * 2 / (1 << aZoom) * y;
 			
@@ -132,36 +168,10 @@ public class Util implements OpenStreetMapViewConstants{
 	                phi += dphi;
 	        }
 	        return phi / (Math.PI / 180.0);	
-			/*
-			final double MerkElipsK = 0.0000001;
-			final long sradiusa = 6378137;
-			final long sradiusb = 6356752;
-			final double FExct = (double) Math.sqrt(sradiusa * sradiusa - sradiusb * sradiusb) / sradiusa;
-			final int TilesAtZoom = 1 << aZoom;
-			double result = (y - TilesAtZoom / 2) / -(TilesAtZoom / (2 * Math.PI));
-			result = (2 * Math.atan(Math.exp(result)) - Math.PI / 2) * 180 / Math.PI;
-			double Zu = result / (180 / Math.PI);
-			double yy = ((y) - TilesAtZoom / 2);
 
-			double Zum1 = Zu;
-			Zu = Math.asin(1 - ((1 + Math.sin(Zum1)) * Math.pow(1 - FExct * Math.sin(Zum1), FExct))
-					/ (Math.exp((2 * yy) / -(TilesAtZoom / (2 * Math.PI))) * Math.pow(1 + FExct * Math.sin(Zum1), FExct)));
-			while (Math.abs(Zum1 - Zu) >= MerkElipsK) {
-				Zum1 = Zu;
-				Zu = Math.asin(1 - ((1 + Math.sin(Zum1)) * Math.pow(1 - FExct * Math.sin(Zum1), FExct))
-						/ (Math.exp((2 * yy) / -(TilesAtZoom / (2 * Math.PI))) * Math.pow(1 + FExct * Math.sin(Zum1), FExct)));
-			}
-
-			if (Zu == Float.NaN)
-				Zu = 0.0;
-
-			result = Zu * 180 / Math.PI;
-
-			return result;
-			*/
 		}
 	}
-
+*/
 	public static int x2lon(int x, int aZoom, final int MAPTILE_SIZEPX) {
 		int px = MAPTILE_SIZEPX * (1 << aZoom);
 		if (x < 0)
@@ -218,6 +228,12 @@ public class Util implements OpenStreetMapViewConstants{
 //			return result;
 //		}
 	}
+
+
+
+
+
+
 
 	// ===========================================================
 	// Inner and Anonymous Classes

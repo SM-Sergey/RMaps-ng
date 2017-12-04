@@ -26,15 +26,14 @@ public class TileURLGeneratorCustom extends TileURLGeneratorBase {
 	@Override
 	public String Get(int x, int y, int z) {
 
-		int bx = mod(x - (1 << (z-1)), (1 << z));
-		int by = (1 << z) - 1 - mod(y - (1 << (z-1)), (1 << z));
-
+		int bx = x - (1 << (z-1));
+		int by = (1 << z) - 1 - y - (1 << (z-1));
 
 		return getBase()
 				.replace(X, Integer.toString(x))
 				.replace(Y, Integer.toString(y))
-				.replace(BX, Integer.toString(bx))
-				.replace(BY, Integer.toString(by))
+				.replace(BX, (bx < 0) ? ("M" + Integer.toString(-bx)) : Integer.toString(bx))
+				.replace(BY, (by < 0) ? ("M" + Integer.toString(-by)) : Integer.toString(by))
 				.replace(RY, Integer.toString((1<<z)-1-y))
 				.replace(Z, Integer.toString(z))
 				.replace(ZP, Integer.toString(z+1))

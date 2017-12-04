@@ -87,6 +87,9 @@ public class PredefMapsPrefActivity extends PreferenceActivity {
 			case 3:
 				pref.setSummary(R.string.osgb36);
 				break;
+			case 4:
+				pref.setSummary(R.string.bd09);
+				break;
 			}
 			prefscr.addPreference(pref);
 		}
