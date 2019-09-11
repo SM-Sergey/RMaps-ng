@@ -98,6 +98,5 @@
     <orderEntry type="library" name="com.android.support:support-v4-22.2.1" level="project" />
     <orderEntry type="library" name="com.android.support:appcompat-v7-22.2.1" level="project" />
     <orderEntry type="module" module-name="mainActivity" />
-    <orderEntry type="module" module-name="mainActivity" />
   </component>
 </module>
