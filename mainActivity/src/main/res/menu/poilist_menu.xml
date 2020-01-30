@@ -35,5 +35,15 @@
         android:icon="@drawable/ric_menu_attachment"
         android:title="@string/menu_import">
     </item>
+    <item
+        android:id="@+id/menu_exportkml_poi"
+        android:icon="@android:drawable/ic_menu_upload"
+        android:title="@string/menu_exporttokml">
+    </item>
+    <item
+        android:id="@+id/menu_exportgpx_poi"
+        android:icon="@android:drawable/ic_menu_upload"
+        android:title="@string/menu_exporttogpx">
+    </item>
 
 </menu>

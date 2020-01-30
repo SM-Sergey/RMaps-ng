@@ -211,10 +211,10 @@ public class PoiListActivity extends ListActivity {
 		} else if (item.getItemId() == R.id.menu_delete) {
 			showDialog(R.id.menu_delete);
 			return true;
-		} else if (item.getItemId() == R.id.menu_exportgpx) {
+		} else if (item.getItemId() == R.id.menu_exportgpx_poi) {
 			DoExportGpx();
 			return true;
-		} else if (item.getItemId() == R.id.menu_exportkml) {
+		} else if (item.getItemId() == R.id.menu_exportkml_poi) {
 			DoExportKml();
 
 		} else if (item.getItemId() == R.id.menu_sort_name) {
