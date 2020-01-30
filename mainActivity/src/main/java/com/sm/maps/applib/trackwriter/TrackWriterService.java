@@ -25,6 +25,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
@@ -44,6 +46,7 @@ public class TrackWriterService extends Service implements OpenStreetMapConstant
     final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
     private TrackStatHelper mTrackStat = new TrackStatHelper();
     private DistanceFormatter mDf;
+    private WakeLock mcpuWakeLock;
 //    private String mLogFileName;
 
 	protected LocationManager mLocationManager;
@@ -140,7 +143,15 @@ public class TrackWriterService extends Service implements OpenStreetMapConstant
 	        throw new IllegalStateException(
 	                "OS doesn't have Service.startForeground OR Service.setForeground!");
 	    }
-		
+
+	    PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+	    if (pm != null) {
+	    	mcpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "gps_service");
+	    	mcpuWakeLock.acquire();
+		} else
+			mcpuWakeLock = null;
+
+
 	}
 
     //final RemoteCallbackList<IRemoteServiceCallback> mCallbacks = new RemoteCallbackList<IRemoteServiceCallback>();
@@ -220,7 +231,11 @@ public class TrackWriterService extends Service implements OpenStreetMapConstant
 
         if(mCallbacks != null)
         	mCallbacks.kill();
-        
+
+        if (mcpuWakeLock != null)
+        	if (mcpuWakeLock.isHeld())
+        		mcpuWakeLock.release();
+
 	}
 
 	private LocationManager getLocationManager() {
