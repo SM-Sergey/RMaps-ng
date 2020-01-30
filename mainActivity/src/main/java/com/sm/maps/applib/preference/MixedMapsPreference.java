@@ -3,6 +3,7 @@ package com.sm.maps.applib.preference;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -19,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 
+import com.sm.maps.applib.MainActivity;
 import com.sm.maps.applib.R;
 import com.sm.maps.applib.utils.CheckBoxPreferenceExt;
 
@@ -200,10 +202,11 @@ public class MixedMapsPreference extends MMPreferenceActivity implements OnShare
 					pref.setTitle(sharedPreferences.getString(key, ""));
 			} else if(key.endsWith("_enabled")) {
 				CheckBoxPreferenceExt pref = (CheckBoxPreferenceExt) findPreference(key.replace("_enabled", ""));
-				if(pref != null)
+				if(pref != null) {
 					pref.setChecked(sharedPreferences.getBoolean(key, true));
+				}
 			}
-			
+
 		}
 	}
 	

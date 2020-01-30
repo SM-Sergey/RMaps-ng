@@ -24,30 +24,43 @@ public class CheckBoxPreferenceExt extends Preference implements CompoundButton.
 	public CheckBoxPreferenceExt(Context context, String keyChecked) {
 		this(context, keyChecked, true);
 	}
-	
+
 	public CheckBoxPreferenceExt(Context context, String keyChecked, boolean defValue) {
 		super(context, null, android.R.attr.checkBoxPreferenceStyle);
 		mDefaultValueChecked = defValue;
 		mPrefKeyChecked = keyChecked;
-		
+		setPersistent(false);
 		mChecked = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(mPrefKeyChecked, mDefaultValueChecked);
 	}
 
-	@Override
-	public View getView(View convertView, ViewGroup parent) {
-		View view = super.getView(convertView, parent);
-		
-        View checkboxView = view.findViewById(android.R.id.checkbox);
-        if (checkboxView != null && checkboxView instanceof Checkable) {
-        	checkboxView.setClickable(true);
-            ((Checkable) checkboxView).setChecked(mChecked);
-            ((CheckBox) checkboxView).setOnCheckedChangeListener(this);
-        }
+	private void bind(View view)
+	{
 
-        view.setOnClickListener(this);
-        view.setLongClickable(true);
-        
+		View checkboxView = view.findViewById(android.R.id.checkbox);
+		if (checkboxView != null && checkboxView instanceof Checkable) {
+			checkboxView.setClickable(true);
+			((CheckBox) checkboxView).setOnCheckedChangeListener(null);
+			((Checkable) checkboxView).setChecked(mChecked);
+			mCheckBox = (Checkable) checkboxView;
+			((CheckBox) checkboxView).setOnCheckedChangeListener(this);
+		}
+
+		view.setOnClickListener(this);
+		view.setLongClickable(true);
+
+	}
+
+	@Override
+	protected View onCreateView(ViewGroup parent) {
+		View view =  super.onCreateView(parent);
+		bind(view);
 		return view;
+	}
+
+	@Override
+	protected void onBindView(View view) {
+		super.onBindView(view);
+		bind(view);
 	}
 
 	@Override
@@ -76,5 +89,5 @@ public class CheckBoxPreferenceExt extends Preference implements CompoundButton.
 		if(mCheckBox != null)
 			mCheckBox.setChecked(isChecked);
 	}
-	
+
 }
