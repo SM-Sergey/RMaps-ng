@@ -1,10 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="whats_new_dialog_text">
-<b>Do you like RMaps?\n
-Buy RMaps.Donation on Google Play Store</b>\n
+<b>Do you like RMaps-ng? Buy RMaps-ng.Donation on Google Play Store</b>\n
 \n
 Do you want to help me translate the app interface? Write me to email sm@venus.ru\n
+\n
+v.0.10.0.1p9\n
+- Now this is <b>RMaps-ng</b> !!!!\n
+- Migration to Android Studio from Eclipse/ADT\n
+- Migration to SDK #22\n
++ Support of MBTiles format for offline maps and layers\n
++ Added big set of icons for POI categories POI\n
++ Added two decimal digits to POI coordinates accuracy\n
+- Loss of POI from map view when other POI is selected - fixed\n
+- Scale bar zoom fixed\n
++ Smooth touch-zoom implemented\n
++ Display scaled tile from other zoom if no tile in current zoom\n
++ Before loading of tile now we displaying scaled tile from other zoom\n
++ Multi-selection of POI for deleting and category change\n
++ Fast POI category chabge in context menu\n
++ If no hardware menu buttonon device display own menu button\n
+- Map sources fixed, added new sources, deleted dead sources.\n
++ In-memory cache control to prevent OOM in devices with big screen with high resolution\n
+- Fixed stop of track writing in background on some devices.\n
+- Fixed bug with random checkbox change on scroll in map setup.\n
+- Fixed bug with mass wal/shm files creation by map downloader on new android\'s.\n
+- Fixed a big set of other bugs.\n
 \n
 v.0.9.4\n
 + Dashboard. Use Menu - Dashboard. Long press on dashboard to add or change value\n

@@ -1,4 +1,5 @@
 build/*
+keystore/*
 mainActivity/build/*
 rMapsFree/build/*
 rMapsFree/release/*

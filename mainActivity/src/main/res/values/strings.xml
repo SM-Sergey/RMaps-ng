@@ -85,7 +85,7 @@
     <string name="message_geodata_notavailable">Data on SD card is not available. Operation cannot be performed.</string>
     <string name="no_inet_conn">No internet connection&#8230;</string>
     <string name="no_items">Your search did not match any items</string>
-    <string name="about_dialog_text">  ©2017 Sergey Markov\n
+    <string name="about_dialog_text">  ©2020, 2019, 2018, 2017 Sergey Markov\n
   ©2009 Robert.Developer\n
   Osmdroid by Nicolas Gramlich\n
   App icon by Everaldo Coelho\n
@@ -101,7 +101,9 @@ All rights reserved\n
 \n
 Questions, sentences mail to sm@venus.ru\n
 \n
-How to and FAQ you can find on http://robertdeveloper.blogspot.com/\n</string>
+How to and FAQ you can find on http://robertdeveloper.blogspot.com/
+Tech. support - https://forum.toadstool.ru/topic/5513-rmaps-ng-%D0%B0%D0%BD%D0%B4%D1%80%D0%BE%D0%B8%D0%B4-%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B4%D0%BB%D1%8F-%D0%BD%D0%B0%D0%B2%D0%B8%D0%B3%D0%B0%D1%86%D0%B8%D0%B8-%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F-%D0%BF%D0%BE%D0%B4%D0%B4%D0%B5%D1%80%D0%B6%D0%BA%D0%B0/       \n
+</string>
     <string name="about_dialog_whats_new">What\'s new&#8230;</string>
     <string name="about_dialog_close">Close</string>
     <string name="search_label">Address:</string>
@@ -162,10 +164,10 @@ How to and FAQ you can find on http://robertdeveloper.blogspot.com/\n</string>
     <string name="pref_onlinecache_summary">Store online maps tiles to sdcard</string>
     <string name="pref_memcache">Tile cache in RAM</string>
     <string name="pref_memcache_summary">RAM cache size in counts of tiles on screen</string>
-    <string name="pref_prevz_cached">Tiles from prev zoom's (cache, offline)</string>
-    <string name="pref_prevz_cached_summary">If cache (or offline map) doesn't contain tile for current zoom, attempt to get and rescale tile from N previous zoom's</string>
-    <string name="pref_prevz_inet">Tiles from prev zoom's (online)</string>
-    <string name="pref_prevz_inet_summary">If online map source doesn't contain tile for current zoom, attempt to get and rescale tile from N previous zoom's</string>
+    <string name="pref_prevz_cached">Tiles from prev zoom\'s (cache, offline)</string>
+    <string name="pref_prevz_cached_summary">If cache (or offline map) doesn\'t contain tile for current zoom, attempt to get and rescale tile from N previous zoom\'s</string>
+    <string name="pref_prevz_inet">Tiles from prev zoom\'s (online)</string>
+    <string name="pref_prevz_inet_summary">If online map source doesn\'t contain tile for current zoom, attempt to get and rescale tile from N previous zoom\'s</string>
     <string name="message_wait">Wait a moment, please&#8230;</string>
     <string name="pref_dir">Directories</string>
     <string name="pref_dir_main">Main RMaps directory</string>
@@ -220,7 +222,8 @@ How to and FAQ you can find on http://robertdeveloper.blogspot.com/\n</string>
     <string name="pref_custommap_dialogmessage">For example:\n
 	    http://c.tile.openstreetmap.org/{z}/{x}/{y}.png\n
 	    Addition to the obvious {z}, {x}, {y} you can use {galileo} for Google maps\n
-	    Write me to email if you need to extends this list of parameters.\n	</string>
+	    Write me to email if you need to extends this list of parameters.\n
+	</string>
     <string name="pref_custommap_dialogmessage_md5">MD5 sum of file[s] containing blank tiles\n
 to detect these tiles and get data from\n
 other zooms. Comma separated.</string>

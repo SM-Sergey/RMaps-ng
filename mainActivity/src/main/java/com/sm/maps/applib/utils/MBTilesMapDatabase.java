@@ -137,7 +137,10 @@ public class MBTilesMapDatabase implements ICacheProvider {
 	@Override
 	protected void finalize() throws Throwable {
 		if(mDatabase != null)
-			mDatabase.close();
+			if (mDatabase.isOpen()) {
+				mDatabase.close();
+			}
+
 		super.finalize();
 	}
 

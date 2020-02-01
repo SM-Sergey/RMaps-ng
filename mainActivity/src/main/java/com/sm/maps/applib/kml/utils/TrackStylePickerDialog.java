@@ -152,7 +152,7 @@ public class TrackStylePickerDialog extends Dialog implements ColorPickerView.On
 		public void onColorChanged(int color) {
 			mColorShadowView.setColor(color);
 			mPaint.setAlpha(Color.alpha(color));
-			Ut.dd("Color.alpha(color)="+Color.alpha(color));
+			Ut.d("Color.alpha(color)="+Color.alpha(color));
 			mPaint.setShadowLayer(mShadowRadiusBar.getProgress() / 10, 0, 0, color);
 			mMap.invalidate();
 		}

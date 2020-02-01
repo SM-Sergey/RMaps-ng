@@ -153,10 +153,6 @@ public class Ut implements OpenStreetMapConstants, OpenStreetMapViewConstants, P
 		
 	}
 
-	public static void dd(String str){
-		Log.d(DEBUGTAG, str);
-	}
-
 	public static void e(String str){
 		if(DEBUGMODE)
 			Log.e(DEBUGTAG, str);

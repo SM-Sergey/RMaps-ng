@@ -65,6 +65,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
@@ -80,7 +81,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v7.app.AppCompatActivity;
 
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.sm.maps.applib.R;
 import com.sm.maps.applib.dashboard.IndicatorManager;
 import com.sm.maps.applib.dashboard.IndicatorView;
@@ -158,8 +158,7 @@ public class MainActivity extends AppCompatActivity {
 	private int mPrefOverlayButtonBehavior;
 	private int mPrefOverlayButtonVisibility;
 	private boolean mHasMenuButton;
-	
-	private GoogleAnalyticsTracker mTracker;
+
 	private ImageView mOverlayView;
 	private ImageView mMainMenu = null;
 	private ExecutorService mThreadPool = Executors.newSingleThreadExecutor(new SimpleThreadFactory("MainActivity.Search"));
@@ -171,9 +170,6 @@ public class MainActivity extends AppCompatActivity {
 
 		if(!OpenStreetMapViewConstants.DEBUGMODE)
         	CrashReportHandler.attach(this);
-
-        mTracker = GoogleAnalyticsTracker.getInstance();
-        mTracker.startNewSession("UA-10715419-3", 20, this);
 
 		mHasMenuButton = ViewConfigurationCompat.hasPermanentMenuKey(ViewConfiguration.get(this));
 
@@ -234,13 +230,6 @@ public class MainActivity extends AppCompatActivity {
 		if (!uiState.getString("app_version", "").equalsIgnoreCase(Ut.getAppVersion(this))) {
 			DisplayMetrics metrics = new DisplayMetrics();
 			getWindowManager().getDefaultDisplay().getMetrics(metrics);
-			
-			mTracker.setCustomVar(1, "Build", Ut.getAppVersion(this), 1);
-			mTracker.setCustomVar(2, "Ver", Ut.getPackVersion(this), 1);
-			mTracker.setCustomVar(3, "DisplaySize", ""+Math.min(metrics.widthPixels, metrics.heightPixels)+"x"+Math.max(metrics.widthPixels, metrics.heightPixels), 1);
-			mTracker.setCustomVar(4, "DisplayDensity", ""+(int)(160*metrics.density), 1);
-			mTracker.setCustomVar(5, "APILevel", Build.VERSION.SDK, 1);
-			mTracker.trackPageView("/InstallApp");
 			
 			showDialog(R.id.whatsnew);
 		}
@@ -746,7 +735,7 @@ public class MainActivity extends AppCompatActivity {
 
 		if (pref.getBoolean("pref_keepscreenon", true)) {
 			myWakeLock = ((PowerManager) getSystemService(POWER_SERVICE)).newWakeLock(
-					PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, "RMaps");
+					PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, "RMaps:scron");
 			myWakeLock.acquire();
 		} else {
 			myWakeLock = null;
@@ -851,7 +840,6 @@ public class MainActivity extends AppCompatActivity {
 			mTileSource.Free();
 		mTileSource = null;
 		mMap.setMoveListener(null);
-		mTracker.stopSession();
 		mThreadPool.shutdown();
 		
 		super.onDestroy();
@@ -1032,11 +1020,6 @@ public class MainActivity extends AppCompatActivity {
 			
 			final String mapid = (String)item.getTitleCondensed();
 			setTileSource(mapid, "", true);
-			
-			if(mTileSource.MAP_TYPE == TileSource.PREDEF_ONLINE) {
-				mTracker.setCustomVar(1, "MAP", mapid);
-				mTracker.trackPageView("/maps");
-			}
 			
 			FillOverlays();
 
@@ -1240,11 +1223,6 @@ public class MainActivity extends AppCompatActivity {
 			final String overlayid = (String)item.getTitleCondensed();
 			setTileSource(mTileSource.ID, overlayid, true);
 			
-			if(mTileSource.MAP_TYPE == TileSource.PREDEF_ONLINE) {
-				mTracker.setCustomVar(1, "OVERLAY", overlayid);
-				mTracker.trackPageView("/overlays");
-			}
-			
 			FillOverlays();
 	        setTitle();
 	        
@@ -1404,16 +1382,7 @@ public class MainActivity extends AppCompatActivity {
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
-		if (id == R.id.add_yandex_bookmark) {
-			return new AlertDialog.Builder(this)
-				.setTitle(R.string.ya_dialog_title)
-				.setMessage(R.string.ya_dialog_message)
-				.setPositiveButton(R.string.ya_dialog_button_caption, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int whichButton) {
-							Browser.saveBookmark(MainActivity.this, "��������� ������", "m.yandex.ru");
-						}
-				}).create();
-		} else if (id == R.id.whatsnew) {
+		if (id == R.id.whatsnew) {
 			return new AlertDialog.Builder(this) //.setIcon( R.drawable.alert_dialog_icon)
 					.setTitle(R.string.about_dialog_whats_new)
 					.setMessage(R.string.whats_new_dialog_text)
@@ -1557,8 +1526,6 @@ public class MainActivity extends AppCompatActivity {
 				// setAutoFollow(false);
 			} else if (what == R.id.set_title) {
 				setTitle();
-			} else if (what == R.id.add_yandex_bookmark) {
-				showDialog(R.id.add_yandex_bookmark);
 			} else if (what == Ut.ERROR_MESSAGE) {
 				if (msg.obj != null)
 					Toast.makeText(MainActivity.this, msg.obj.toString(), Toast.LENGTH_LONG).show();
@@ -1723,7 +1690,7 @@ public class MainActivity extends AppCompatActivity {
 		public void onSensorChanged(SensorEvent event) {
 			if (iOrientation < 0) {
 				iOrientation = ((WindowManager) getSystemService(Context.WINDOW_SERVICE))
-						.getDefaultDisplay().getOrientation();
+						.getDefaultDisplay().getRotation();
 			}
 
 			mCompassView.setAzimuth(event.values[0] + 90 * iOrientation);

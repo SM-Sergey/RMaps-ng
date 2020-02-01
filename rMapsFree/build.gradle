@@ -2,16 +2,12 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 22
-    buildToolsVersion "27.0.1"
+    buildToolsVersion "29.0.3"
 
     defaultConfig {
         applicationId "com.sm.maps"
         minSdkVersion 8
         targetSdkVersion 22
-       // compileOptions {
-       //     sourceCompatibility JavaVersion.VERSION_1_5
-       //     targetCompatibility JavaVersion.VERSION_1_5
-       // }
     }
 
     buildTypes {
@@ -20,9 +16,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+
+    lintOptions {
+        checkReleaseBuilds false
+    }
 }
 
 dependencies {
-    compile project(':mainActivity')
-    compile 'com.android.support:appcompat-v7:22.2.1'
+    implementation project(':mainActivity')
+    implementation 'com.android.support:appcompat-v7:22.2.1'
 }

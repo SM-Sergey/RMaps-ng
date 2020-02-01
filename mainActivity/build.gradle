@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 22
-    buildToolsVersion "27.0.1"
+    buildToolsVersion "29.0.3"
 
     defaultConfig {
         minSdkVersion 8
@@ -15,9 +15,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+
+    lintOptions {
+        checkReleaseBuilds false
+    }
+
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:22.2.1'
-    compile files('libs/libGoogleAnalytics.jar')
+    implementation 'com.android.support:appcompat-v7:22.2.1'
 }

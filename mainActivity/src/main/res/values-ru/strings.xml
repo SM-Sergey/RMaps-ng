@@ -85,7 +85,7 @@
   <string name="message_geodata_notavailable">Данные на SD карте недоступны. Операция не может быть выполнена.</string>
   <string name="no_inet_conn">Нет соединения с интернетом...</string>
   <string name="no_items">По вашему запросу ничего не найдено</string>
-  <string name="about_dialog_text">  ©2017 Sergey Markov\n
+  <string name="about_dialog_text">  ©2020, 2019, 2018, 2017 Sergey Markov\n
   ©2009 Robert.Developer\n
   Osmdroid by Nicolas Gramlich\n
   App icon by Everaldo Coelho\n
@@ -99,7 +99,9 @@
   Mike DE\n
 All rights reserved\n
 \n
-Вопросы и предложения направляйте по электрической почте sm@venus.ru\n</string>
+Вопросы и предложения направляйте по электронной почте sm@venus.ru
+Техподдержка - https://forum.toadstool.ru/topic/5513-rmaps-ng-%D0%B0%D0%BD%D0%B4%D1%80%D0%BE%D0%B8%D0%B4-%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B4%D0%BB%D1%8F-%D0%BD%D0%B0%D0%B2%D0%B8%D0%B3%D0%B0%D1%86%D0%B8%D0%B8-%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F-%D0%BF%D0%BE%D0%B4%D0%B4%D0%B5%D1%80%D0%B6%D0%BA%D0%B0/\n
+    \n</string>
   <string name="about_dialog_whats_new">Что нового</string>
   <string name="about_dialog_close">Закрыть</string>
   <string name="search_label">Адрес:</string>

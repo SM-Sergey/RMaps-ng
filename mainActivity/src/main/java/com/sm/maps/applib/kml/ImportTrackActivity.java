@@ -141,7 +141,7 @@ public class ImportTrackActivity extends AppCompatActivity {
 
 				if(parser != null){
 					mPoiManager.beginTransaction();
-					Ut.dd("Start parsing file " + file.getName());
+					Ut.d("Start parsing file " + file.getName());
 					try {
 						if(FileUtils.getExtension(file.getName()).equalsIgnoreCase(".kml"))
 							parser.parse(file, new KmlTrackParser(mPoiManager));
@@ -162,7 +162,7 @@ public class ImportTrackActivity extends AppCompatActivity {
 						Ut.w("OutOfMemoryError");
 						mPoiManager.rollbackTransaction();
 					}
-					Ut.dd("Pois commited");
+					Ut.d("Pois commited");
 				}
 
 				dlgWait.dismiss();

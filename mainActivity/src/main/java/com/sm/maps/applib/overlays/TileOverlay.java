@@ -77,9 +77,12 @@ public class TileOverlay extends TileViewOverlay implements OpenStreetMapConstan
 			mTileSource.Free();
 		
 		mTileSource = tileSource;
-		mTileSource.setHandler(mTileMapHandler);
-		mOffsetLat = mTileSource.OFFSET_LAT;
-		mOffsetLon = mTileSource.OFFSET_LON;
+
+		if (mTileSource != null) {
+			mTileSource.setHandler(mTileMapHandler);
+			mOffsetLat = mTileSource.OFFSET_LAT;
+			mOffsetLon = mTileSource.OFFSET_LON;
+		}
 	}
 	
 	public TileSource getTileSource() {

@@ -84,7 +84,7 @@
   <string name="message_geodata_notavailable">SD 卡上的数据不可用。操作不能执行。</string>
   <string name="no_inet_conn">没有网络连接...</string>
   <string name="no_items">没有匹配内容</string>
-  <string name="about_dialog_text">©2017 Sergey Markov\n
+  <string name="about_dialog_text">©2020, 2019, 2018, 2017 Sergey Markov\n
 ©2009 Robert.Developer\n
 Osmdroid：Nicolas Gramlich\n
 图标：Everaldo Coelho\n

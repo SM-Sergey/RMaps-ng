@@ -84,7 +84,7 @@
   <string name="message_geodata_notavailable">無法取得 SD 卡上的資料。不能執行操作。</string>
   <string name="no_inet_conn">沒有網路連線...</string>
   <string name="no_items">沒有比對內容</string>
-  <string name="about_dialog_text">  ©2017 Sergey Markov\n
+  <string name="about_dialog_text">  ©2020, 2019, 2018, 2017 Sergey Markov\n
 ©2009 Robert.Developer\n
 Osmdroid 製作 Nicolas Gramlich\n
 App 軟體圖示製作 Everaldo Coelho\n

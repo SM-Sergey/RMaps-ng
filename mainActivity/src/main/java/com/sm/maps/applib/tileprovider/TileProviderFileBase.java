@@ -166,7 +166,7 @@ public class TileProviderFileBase extends TileProviderBase {
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			if(oldVersion < 2){
 				try {
-					Ut.dd("Upgrade IndexDatabase ver."+oldVersion+" to ver."+newVersion);
+					Ut.d("Upgrade IndexDatabase ver."+oldVersion+" to ver."+newVersion);
 					db.execSQL(DELETE_FROM_ListCashTables);
 				} catch (SQLException e) {
 					e.printStackTrace();

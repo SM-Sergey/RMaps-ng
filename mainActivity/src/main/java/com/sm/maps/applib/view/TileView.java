@@ -373,13 +373,17 @@ public class TileView extends View {
 	}
 	
 	public void setTileSource(TileSource tileSource) {
+
 		if(mTileSource != null)
 			mTileSource.Free();
+
 		mTileSource = tileSource;
-		//mTileSource.setHandler(mTileMapHandler);
-		mOffsetLat = mTileSource.OFFSET_LAT;
-		mOffsetLon = mTileSource.OFFSET_LON;
-		
+
+		if (mTileSource != null) {
+			mOffsetLat = mTileSource.OFFSET_LAT;
+			mOffsetLon = mTileSource.OFFSET_LON;
+		}
+
 		mTileOverlay.setTileSource(tileSource);
 		
 		setZoomLevel(getZoomLevel(), true);

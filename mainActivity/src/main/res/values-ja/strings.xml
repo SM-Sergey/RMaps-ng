@@ -84,7 +84,7 @@
   <string name="message_geodata_notavailable">SDカードのデータが利用できません。操作を実行することができません。</string>
   <string name="no_inet_conn">インターネットに接続されていません。</string>
   <string name="no_items">検索項目が見つかりませんでした。</string>
-  <string name="about_dialog_text">  ©2017 Sergey Markov\n
+  <string name="about_dialog_text">  ©2020, 2019, 2018, 2017 Sergey Markov\n
 ©2009 Robert.Developer\n
   Osmdroid by Nicolas Gramlich\n
   App icon by Everaldo Coelho\n

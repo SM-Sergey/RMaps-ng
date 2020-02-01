@@ -146,11 +146,10 @@ public class TrackWriterService extends Service implements OpenStreetMapConstant
 
 	    PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 	    if (pm != null) {
-	    	mcpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "gps_service");
+	    	mcpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RMaps:gps_service");
 	    	mcpuWakeLock.acquire();
 		} else
 			mcpuWakeLock = null;
-
 
 	}
 

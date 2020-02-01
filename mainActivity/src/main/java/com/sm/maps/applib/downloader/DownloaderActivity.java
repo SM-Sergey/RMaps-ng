@@ -1,6 +1,7 @@
 package com.sm.maps.applib.downloader;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 
 import org.andnav.osm.util.GeoPoint;
 
@@ -56,9 +57,36 @@ public class DownloaderActivity extends AppCompatActivity {
 	private String mFileName;
 	private boolean mLoadToOnlineCache;
 
+	private static class DownloaderHandler extends Handler {
+
+		private WeakReference<DownloaderActivity> mAct;
+
+		DownloaderHandler(DownloaderActivity act) {
+			mAct = new WeakReference<DownloaderActivity>(act);
+		}
+
+		public void setAct(DownloaderActivity act) {
+			mAct.clear();
+			mAct = new WeakReference<DownloaderActivity>(act);
+		}
+
+		@Override
+		public void handleMessage(Message msg) {
+			DownloaderActivity act = mAct.get();
+			act.processMessage(msg);
+		}
+	}
+
+	private static DownloaderHandler mHandler;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		if (mHandler == null)
+			mHandler = new DownloaderHandler(this);
+		else
+			mHandler.setAct(this);
 
 		setContentView(R.layout.downloaderactivity);
 
@@ -149,7 +177,8 @@ public class DownloaderActivity extends AppCompatActivity {
 			mFileName = fileName;
 			mLoadToOnlineCache = mFileName.equalsIgnoreCase("");
 			mDownloadedAreaOverlay.Init(DownloaderActivity.this, lat0, lon0, lat1, lon1);
-			mHandler.sendMessage(mHandler.obtainMessage(R.id.download_start, b));
+			if (mHandler != null)
+				mHandler.sendMessage(mHandler.obtainMessage(R.id.download_start, b));
 			
 			final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(DownloaderActivity.this);
 			final Editor editor = pref.edit();
@@ -169,76 +198,75 @@ public class DownloaderActivity extends AppCompatActivity {
 			b.putInt(CNT, tileCnt);
 			b.putInt(ERRCNT, errorCnt);
 			mDownloadedAreaOverlay.setLastDowloadedTile(x, y, z, mMap.getTileView());
-			mHandler.sendMessage(mHandler.obtainMessage(R.id.tile_done, b));
+			if (mHandler != null)
+				mHandler.sendMessage(mHandler.obtainMessage(R.id.tile_done, b));
 		}
 
 	};
 
-	private final Handler mHandler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			if(msg.what == R.id.done) {
-				findViewById(R.id.open).setVisibility(View.VISIBLE);
-				findViewById(R.id.progress).setVisibility(View.GONE);
-				findViewById(R.id.pause).setVisibility(View.GONE);
-				mTextVwTileCnt.setText(Integer.toString(mTileCntTotal));
-				mTextVwTime.setText(Ut.formatTime(System.currentTimeMillis() - mStartTime));
-				mDownloadedAreaOverlay.downloadDone();
-				mMap.invalidate(); //postInvalidate();
-				
-			} else if(msg.what == R.id.download_start) {
-				Bundle b = (Bundle) msg.obj;
-				mTileCntTotal = b.getInt(CNT);
-				mStartTime = b.getLong(TIME);
-				mMapID = b.getString(MAPID);
-				final int zoom =b.getInt(ZOOM);
-				final int lat =b.getInt(LAT);
-				final int lon =b.getInt(LON);
-				
-				setTitle();
+	public void processMessage(Message msg) {
+		if(msg.what == R.id.done) {
+			findViewById(R.id.open).setVisibility(View.VISIBLE);
+			findViewById(R.id.progress).setVisibility(View.GONE);
+			findViewById(R.id.pause).setVisibility(View.GONE);
+			mTextVwTileCnt.setText(Integer.toString(mTileCntTotal));
+			mTextVwTime.setText(Ut.formatTime(System.currentTimeMillis() - mStartTime));
+			mDownloadedAreaOverlay.downloadDone();
+			mMap.invalidate(); //postInvalidate();
 
-				mProgress.setMax(mTileCntTotal);
-				mTextVwTileCnt.setText(Integer.toString(mTileCntTotal));
-				mTextVwTime.setText("00:00");
+		} else if(msg.what == R.id.download_start) {
+			Bundle b = (Bundle) msg.obj;
+			mTileCntTotal = b.getInt(CNT);
+			mStartTime = b.getLong(TIME);
+			mMapID = b.getString(MAPID);
+			final int zoom =b.getInt(ZOOM);
+			final int lat =b.getInt(LAT);
+			final int lon =b.getInt(LON);
 
-				boolean needChangeTileSource = true;
-				if (mTileSource != null) {
-					if(mMapID != mTileSource.ID)
-						mTileSource.Free();
-					else
-						needChangeTileSource = false;
-				}
+			setTitle();
 
-				if(needChangeTileSource) {
-					try {
-						mTileSource = new TileSource(DownloaderActivity.this, mMapID);
-					} catch (Exception e) {
-					}
-					mMap.setTileSource(mTileSource);
-				}
-				mMap.getController().setZoom(zoom);
-				mMap.getController().setCenter(new GeoPoint(lat, lon));
+			mProgress.setMax(mTileCntTotal);
+			mTextVwTileCnt.setText(Integer.toString(mTileCntTotal));
+			mTextVwTime.setText("00:00");
 
-			} else if(msg.what == R.id.tile_done) { 
-				final int tileCnt = ((Bundle) msg.obj).getInt(CNT);
-				final int errorCnt = ((Bundle) msg.obj).getInt(ERRCNT);
-				mProgress.setProgress(tileCnt);
-				
-				mTextVwTileCnt.setText(String.format("%d/%d", tileCnt, mTileCntTotal));
-				if(errorCnt > 0)
-					mTextVwError.setText(String.format("ERRORS: %d", errorCnt));
-				
-				final long time = System.currentTimeMillis();
-				if(time - mStartTime > 5 * 1000) 
-					mTextVwTime.setText(String.format("%s / %s", Ut.formatTime(time - mStartTime), Ut.formatTime((long)((double)(time - mStartTime) / (1.0f * tileCnt / mTileCntTotal))) ));
+			boolean needChangeTileSource = true;
+			if (mTileSource != null) {
+				if(mMapID != mTileSource.ID)
+					mTileSource.Free();
 				else
-					mTextVwTime.setText(Ut.formatTime(time - mStartTime));
-				
-				mMap.invalidate(); //postInvalidate();
+					needChangeTileSource = false;
 			}
+
+			if(needChangeTileSource) {
+				try {
+					if (mTileSource != null)
+						mTileSource.Free();
+					mTileSource = new TileSource(DownloaderActivity.this, mMapID);
+				} catch (Exception e) {
+				}
+				mMap.setTileSource(mTileSource);
+			}
+			mMap.getController().setZoom(zoom);
+			mMap.getController().setCenter(new GeoPoint(lat, lon));
+
+		} else if(msg.what == R.id.tile_done) {
+			final int tileCnt = ((Bundle) msg.obj).getInt(CNT);
+			final int errorCnt = ((Bundle) msg.obj).getInt(ERRCNT);
+			mProgress.setProgress(tileCnt);
+
+			mTextVwTileCnt.setText(String.format("%d/%d", tileCnt, mTileCntTotal));
+			if(errorCnt > 0)
+				mTextVwError.setText(String.format("ERRORS: %d", errorCnt));
+
+			final long time = System.currentTimeMillis();
+			if(time - mStartTime > 5 * 1000)
+				mTextVwTime.setText(String.format("%s / %s", Ut.formatTime(time - mStartTime), Ut.formatTime((long)((double)(time - mStartTime) / (1.0f * tileCnt / mTileCntTotal))) ));
+			else
+				mTextVwTime.setText(Ut.formatTime(time - mStartTime));
+
+			mMap.invalidate(); //postInvalidate();
 		}
-	};
-	
+	}
 
 	protected void onResume() {
 		Intent intent = getIntent();
@@ -265,7 +293,9 @@ public class DownloaderActivity extends AppCompatActivity {
 	@Override
 	protected void onPause() {
 		unbindService(mConnection);
-		
+
+		mMap.setTileSource(null);
+
 		if (mTileSource != null)
 			mTileSource.Free();
 

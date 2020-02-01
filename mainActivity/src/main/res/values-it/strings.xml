@@ -84,7 +84,7 @@
   <string name="message_geodata_notavailable">I dati sulla SD card non sono disponibili. L\'operazione non può essere eseguita.</string>
   <string name="no_inet_conn">Nessuna connessione internet…</string>
   <string name="no_items">La tua ricerca non ha trovato risultati</string>
-  <string name="about_dialog_text">©2017 Sergey Markov\n
+  <string name="about_dialog_text">©2020, 2019, 2018, 2017 Sergey Markov\n
 ©2009 Robert.Developer\n
 Osmdroid di Nicolas Gramlich\n
 App icon di Everaldo Coelho\n

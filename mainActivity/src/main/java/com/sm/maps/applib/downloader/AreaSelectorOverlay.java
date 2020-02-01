@@ -91,7 +91,7 @@ public class AreaSelectorOverlay extends TileViewOverlay {
 			
 			final GeoPoint g = pj.fromPixels(e2.getX(), e2.getY());
 			
-			Ut.dd(g.toDoubleString());
+			Ut.d(g.toDoubleString());
 			
 			switch(mPointHolded) {
 			case 0:

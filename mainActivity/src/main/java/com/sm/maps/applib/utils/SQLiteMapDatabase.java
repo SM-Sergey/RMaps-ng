@@ -13,6 +13,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.util.Log;
 
 import com.sm.maps.applib.tileprovider.TileSource;
 
@@ -35,6 +36,8 @@ public class SQLiteMapDatabase implements ICacheProvider {
 	private static final String RET = "ret";
 	private static final long MAX_DATABASE_SIZE = 1945 * 1024 * 1024; // 1.9GB
 	private static final String JOURNAL = "-journal";
+	private static final String SHM = "-shm";
+	private static final String WAL = "-wal";
 	private static final String SQLITEDB = "sqlitedb";
 	private static final String SQL_DELTILE_WHERE = "x = ? AND y = ? AND z = ?";
 	private static final String TILES = "tiles";
@@ -67,14 +70,19 @@ public class SQLiteMapDatabase implements ICacheProvider {
 				mBaseFileIndex = 0;
 				// Подсчитаем количество подходящих файлов
 				for (int i = 0; i < files.length; i++) {
-					if(files[i].getName().startsWith(mBaseFile.getName()) && !files[i].getName().endsWith(JOURNAL)) {
-						j = j + 1;
-						
-						try {
-							final int index = Integer.getInteger(files[i].getName().replace(mBaseFile.getName(), ""));
-							if(index > mBaseFileIndex)
-								mBaseFileIndex = index;
-						} catch (Exception e) {
+					if(files[i].getName().startsWith(mBaseFile.getName())) {
+						Ut.d( "DB File count:" + files[i].getName());
+						if (!files[i].getName().endsWith(JOURNAL) &&
+							!files[i].getName().endsWith(SHM) &&
+							!files[i].getName().endsWith(WAL)) {
+							j = j + 1;
+
+							try {
+								final int index = Integer.getInteger(files[i].getName().replace(mBaseFile.getName(), ""));
+								if (index > mBaseFileIndex)
+									mBaseFileIndex = index;
+							} catch (Exception e) {
+							}
 						}
 					}
 				}
@@ -87,7 +95,11 @@ public class SQLiteMapDatabase implements ICacheProvider {
 				// Заполняем массив 
 				j = 0; long minsize = 0;
 				for (int i = 0; i < files.length; i++) {
-					if(files[i].getName().startsWith(mBaseFile.getName()) && !files[i].getName().endsWith(JOURNAL)) {
+					if(files[i].getName().startsWith(mBaseFile.getName()) &&
+							!files[i].getName().endsWith(JOURNAL) &&
+							!files[i].getName().endsWith(SHM) &&
+							!files[i].getName().endsWith(WAL) ) {
+						Ut.d( "DB File opn:" + files[i].getName());
 						try {
 							mDatabase[j] = new CashDatabaseHelper(null, files[i].getAbsolutePath()).getWritableDatabase();
 							mDatabase[j].setMaximumSize(MAX_DATABASE_SIZE);
@@ -116,7 +128,7 @@ public class SQLiteMapDatabase implements ICacheProvider {
 				}
 			}
 		}
-		
+
 //		if(aException != null)
 //			throw aException;
 	}
@@ -192,6 +204,8 @@ public class SQLiteMapDatabase implements ICacheProvider {
 
 	public synchronized void putTile(final int aX, final int aY, final int aZ, final byte[] aData) throws RException {
 		if (this.mDatabaseWritable != null) {
+			while (existsTile(aX, aY, aZ))
+				deleteTile("", aX, aY, aZ);
 			final ContentValues cv = new ContentValues();
 			cv.put("x", aX);
 			cv.put("y", aY);
@@ -273,9 +287,11 @@ public class SQLiteMapDatabase implements ICacheProvider {
 
 	@Override
 	protected void finalize() throws Throwable {
-		for(int i = 0; i < mDatabase.length; i++) {
-			if(mDatabase[i] != null)
-				mDatabase[i].close();
+		for (int i = 0; i < mDatabase.length; i++) {
+			if (mDatabase[i] != null)
+				if (mDatabase[i].isOpen()) {
+					mDatabase[i].close();
+				}
 		}
 		super.finalize();
 	}
