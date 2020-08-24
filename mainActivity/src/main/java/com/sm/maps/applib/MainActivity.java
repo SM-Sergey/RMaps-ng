@@ -120,7 +120,9 @@ import com.sm.maps.applib.view.TileViewOverlay;
 public class MainActivity extends AppCompatActivity {
 	private static final String MAPNAME = "MapName";
 	private static final String ACTION_SHOW_POINTS = "com.sm.maps.action.SHOW_POINTS";
-	
+
+	private AppCompatActivity mAct;
+
 	private MapView mMap;
 	private ImageView ivAutoFollow;
 	private CompassView mCompassView;
@@ -162,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
 	private ImageView mOverlayView;
 	private ImageView mMainMenu = null;
 	private ExecutorService mThreadPool = Executors.newSingleThreadExecutor(new SimpleThreadFactory("MainActivity.Search"));
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -170,6 +172,8 @@ public class MainActivity extends AppCompatActivity {
 
 		if(!OpenStreetMapViewConstants.DEBUGMODE)
         	CrashReportHandler.attach(this);
+
+		mAct = this;
 
 		mHasMenuButton = ViewConfigurationCompat.hasPermanentMenuKey(ViewConfiguration.get(this));
 
@@ -454,14 +458,18 @@ public class MainActivity extends AppCompatActivity {
 
 			mMainMenu.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					BaseInputConnection mInputConnection = new BaseInputConnection(mMap, true);
-					KeyEvent kd = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MENU);
-					KeyEvent ku = new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MENU);
-					mInputConnection.sendKeyEvent(kd);
-					mInputConnection.sendKeyEvent(ku);
-					//openOptionsMenu();
+					v.showContextMenu();
 				}
 			});
+
+			mMainMenu.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+
+				public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+					mAct.onCreateOptionsMenu(menu);
+					mAct.onPrepareOptionsMenu(menu);
+				}
+			});
+
 		}
 
         mOverlayView = new ImageView(this);
@@ -1370,6 +1378,8 @@ public class MainActivity extends AppCompatActivity {
 					Toast.makeText(this, R.string.message_noradar, Toast.LENGTH_LONG).show();
 				}
 			}
+			else
+				onOptionsItemSelected(item);
 		}
 		
 		final ContextMenuInfo menuInfo = item.getMenuInfo();
