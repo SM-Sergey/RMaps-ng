@@ -85,161 +85,154 @@ public class TileProviderBase {
 			mThreadPool.execute(new Runnable() {
 				public void run() {
 					XYZ xyz;
-					Collection<XYZ> col;
-					Iterator<XYZ> it;
+					XYZ[] arr;
 					byte[] data = null;
 					Bitmap bmp = null;
 					boolean bmpFlag = false;
-					boolean fGC = true;
 					boolean testGC = false;
-					boolean fSend = false;
+					boolean fSend;
+					int num_tiles = 0;
 
 					while (!mThreadPool.isShutdown()) {
 
-						xyz = null;
+						arr = null;
 
 						synchronized (mPendCacheReq) {
 							while (mPendCacheReq.isEmpty() && !mThreadPool.isShutdown() && !testGC) {
 								try {
 									mPendCacheReq.wait(150);
+									if (mPendCacheReq.isEmpty() && num_tiles > 50) {
+										testGC = true;
+									}
 								} catch (InterruptedException e) {
-								}
-								if (mPendCacheReq.isEmpty() && !fGC) {
-									testGC = true;
 								}
 							}
 							if (!mThreadPool.isShutdown() && !mPendCacheReq.isEmpty()) {
-								col = mPendCacheReq.values();
-								it = col.iterator();
-								xyz = it.next();
+								arr = mPendCacheReq.values().toArray(new XYZ[0]);
 							}
 						}
 
 						synchronized (mInUse) {
-							if (mInUse.flag1 || mInUse.flag2 || xyz != null) testGC = false;
+							if (mInUse.flag1 || mInUse.flag2 || arr != null) testGC = false;
 						}
 
 						if (testGC) {
-							if (fSend) {
-								SendMessageSuccess();
-								fSend = false;
-							}
 							System.gc();
 							testGC = false;
-							fGC = true;
+							num_tiles = 0;
 						}
 
-						if (xyz != null && !mThreadPool.isShutdown()) {
+						if (arr != null) {
+							num_tiles += arr.length;
+							for (int i = 0; i < arr.length && !mThreadPool.isShutdown(); i++) {
+								xyz = arr[i];
+								bmp = null;
 
-							fGC = false;
-							bmp = null;
+								Ut.i("Starting for url: " + xyz.TILEURL);
 
-							Ut.i("Starting for url: " + xyz.TILEURL);
+								if (mSourceType == SRC_OFFLINE) {
 
-							if (mSourceType == SRC_OFFLINE) {
+									// Attempt to get tile from current, then previous zooms
+									Bitmap zbmp = null;
+									Bitmap tbmp;
+									int z;
+									int x;
+									int y;
+									int xm;
+									int ym;
+									int az = -1;
 
-								// Attempt to get tile from current, then previous zooms
-								Bitmap zbmp = null;
-								Bitmap tbmp;
-								int z;
-								int x;
-								int y;
-								int xm;
-								int ym;
-								int az = -1;
-
-								do {
-									az += 1;
-									z = xyz.Z - az;
-									x = xyz.X / (1 << az);
-									y = xyz.Y / (1 << az);
-									xm = xyz.X & ((1 << az) - 1);
-									ym = xyz.Y & ((1 << az) - 1);
-									if (z > 0 && z <= getTileSource().ZOOM_MAXDNLD) {
+									do {
+										az += 1;
+										z = xyz.Z - az;
+										x = xyz.X / (1 << az);
+										y = xyz.Y / (1 << az);
+										xm = xyz.X & ((1 << az) - 1);
+										ym = xyz.Y & ((1 << az) - 1);
+										if (z > 0 && z <= getTileSource().ZOOM_MAXDNLD) {
 //                                    zbmp = mPrevCachedCache.getMapTile(prevZurl);
 //                                    if (zbmp == null) {
-										data = getSingleTile(x, y, z);
-										if (data != null && !isBlank(data))
-											try {
-												zbmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-											} catch (Throwable e) {
-												zbmp = null;
-											}
+											data = getSingleTile(x, y, z);
+											if (data != null && !isBlank(data))
+												try {
+													zbmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+												} catch (Throwable e) {
+													zbmp = null;
+												}
 //                                        if (zbmp != null) {
 //                                            mPrevCachedCache.putTile(prevZurl, zbmp);
 //                                        }
 //                                    }
+										}
 									}
-								}
-								while (zbmp == null && z > 0 && az < getTileSource().mPrevZCached);
+									while (zbmp == null && z > 0 && az < getTileSource().mPrevZCached);
 
-								if (zbmp != null) {
-									if (az == 0) {
-										if (mTileCache.putTile(xyz.TILEURL, zbmp, MapTileMemCache.SRC_INET, false, null))
-											bmpFlag = true;
-										else
-											zbmp.recycle();
-									} else {
-										bmp = scalePartOfBitmap(zbmp, (zbmp.getWidth() / (1 << az)) * xm, (zbmp.getHeight() / (1 << az)) * ym,
-												zbmp.getWidth() / (1 << az), zbmp.getHeight() / (1 << az),
-												zbmp.getWidth(), zbmp.getHeight());
-										if ( mTileCache.putTile(xyz.TILEURL, bmp, MapTileMemCache.SRC_INET, false, null))
-											bmpFlag = true;
-										else
-											bmp.recycle();
-									}
-								}
-
-							} else if (mCacheProvider != null && getTileSource().mOnlineMapCacheEnabled) {
-
-								data = mCacheProvider.getTile(xyz.TILEURL, xyz.X, xyz.Y, xyz.Z);
-
-								if (data != null && !isBlank(data)) {
-
-									try {
-										bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-									} catch (Throwable e) {
-										bmp = null;
+									if (zbmp != null) {
+										if (az == 0) {
+											if (mTileCache.putTile(xyz.TILEURL, zbmp, MapTileMemCache.SRC_INET, false, null))
+												bmpFlag = true;
+											else
+												zbmp.recycle();
+										} else {
+											bmp = scalePartOfBitmap(zbmp, (zbmp.getWidth() / (1 << az)) * xm, (zbmp.getHeight() / (1 << az)) * ym,
+													zbmp.getWidth() / (1 << az), zbmp.getHeight() / (1 << az),
+													zbmp.getWidth(), zbmp.getHeight());
+											if (mTileCache.putTile(xyz.TILEURL, bmp, MapTileMemCache.SRC_INET, false, null))
+												bmpFlag = true;
+											else
+												bmp.recycle();
+										}
 									}
 
-									if (bmp == null) {
-										mCacheProvider.deleteTile(xyz.TILEURL, xyz.X, xyz.Y, xyz.Z);
-									} else {
-										if (mTileCache.putTile(xyz.TILEURL, bmp, MapTileMemCache.SRC_CACHE, false, null)) {
-											bmpFlag = true;
-										} else bmp.recycle();
+								} else if (mCacheProvider != null && getTileSource().mOnlineMapCacheEnabled) {
 
-									}
-								}
-							}
+									data = mCacheProvider.getTile(xyz.TILEURL, xyz.X, xyz.Y, xyz.Z);
 
-							if ((bmp == null || xyz.mReload) && (mSourceType == SRC_ONLINE)) {
-								if (getTileSource().mPrevZCached != 0 && getTileSource().mOnlineMapCacheEnabled && mCacheProvider != null) {
-									synchronized (mPendCache2Req) {
-										if (!mPendCache2Req.containsKey(xyz.TILEURL)) {
-											mPendCache2Req.put(xyz.TILEURL, xyz);
-											mPendCache2Req.notifyAll();
+									if (data != null && !isBlank(data)) {
+
+										try {
+											bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+										} catch (Throwable e) {
+											bmp = null;
+										}
+
+										if (bmp == null) {
+											mCacheProvider.deleteTile(xyz.TILEURL, xyz.X, xyz.Y, xyz.Z);
+										} else {
+											if (mTileCache.putTile(xyz.TILEURL, bmp, MapTileMemCache.SRC_CACHE, false, null)) {
+												bmpFlag = true;
+											} else bmp.recycle();
+
 										}
 									}
 								}
-								synchronized (mPendTileReq) {
-									if (!mPendTileReq.containsKey(xyz.TILEURL)) {
-										mPendTileReq.put(xyz.TILEURL, xyz);
-										mPendTileReq.notifyAll();
+
+								if ((bmp == null || xyz.mReload) && (mSourceType == SRC_ONLINE)) {
+									if (getTileSource().mPrevZCached != 0 && getTileSource().mOnlineMapCacheEnabled && mCacheProvider != null) {
+										synchronized (mPendCache2Req) {
+											if (!mPendCache2Req.containsKey(xyz.TILEURL)) {
+												mPendCache2Req.put(xyz.TILEURL, xyz);
+												mPendCache2Req.notifyAll();
+											}
+										}
+									}
+									synchronized (mPendTileReq) {
+										if (!mPendTileReq.containsKey(xyz.TILEURL)) {
+											mPendTileReq.put(xyz.TILEURL, xyz);
+											mPendTileReq.notifyAll();
+										}
 									}
 								}
-							}
 
-							synchronized (mPendCacheReq) {
-								mPendCacheReq.remove(xyz.TILEURL);
-								fSend = mPendCacheReq.isEmpty() && bmpFlag;
+								synchronized (mPendCacheReq) {
+									mPendCacheReq.remove(xyz.TILEURL);
+								}
 							}
-
-							if (fSend) {
-								SendMessageSuccess();
-								bmpFlag = false;
-							}
-
+						}
+						if (bmpFlag)
+						{
+							SendMessageSuccess();
+							bmpFlag = false;
 						}
 					}
 				}
@@ -251,102 +244,97 @@ public class TileProviderBase {
 			mThreadPool.execute(new Runnable() {
 				public void run() {
 					XYZ xyz;
-					Collection<XYZ> col;
-					Iterator<XYZ> it;
+					XYZ[] arr;
 					boolean bmpFlag = false;
-					boolean fLast;
 					boolean clearUse = false;
 					boolean wasRun = false;
 
 					while (!mThreadPool.isShutdown()) {
 
-						xyz = null;
+						arr = null;
 
 						synchronized (mPendCache2Req) {
 							while (mPendCache2Req.isEmpty() && !mThreadPool.isShutdown() && !clearUse) {
 								try {
 									mPendCache2Req.wait(160);
+									clearUse = wasRun && mPendCache2Req.isEmpty();
 								} catch (InterruptedException e) {
 								}
-								clearUse = wasRun && mPendCache2Req.isEmpty();
 							}
 							if (!mThreadPool.isShutdown() && !mPendCache2Req.isEmpty()) {
-								col = mPendCache2Req.values();
-								it = col.iterator();
-								xyz = it.next();
+								arr = mPendCache2Req.values().toArray(new XYZ[0]);
 							}
 						}
+
+						if (arr != null)
+							clearUse = false;
 
 						synchronized (mInUse) {
 							if (clearUse) {
 								mInUse.flag1 = false;
 								clearUse = false;
 								wasRun = false;
-							} else {
+							} else if (arr != null) {
 								mInUse.flag1 = true;
 								wasRun = true;
 							}
 						}
 
-						if (xyz != null && !mThreadPool.isShutdown()) {
-							// Attempt to get tile from previous zooms
-							Bitmap zbmp = null;
-							Bitmap tbmp;
-							Bitmap bmp;
-							int z;
-							int x;
-							int y;
-							int xm;
-							int ym;
-							int az = 0;
-							byte[] data;
+						if (arr != null) {
+							for (int i = 0; i < arr.length && !mThreadPool.isShutdown(); i++) {
+								xyz = arr[i];
 
-							do {
-								az += 1;
-								z = xyz.Z - az;
-								x = xyz.X / (1 << az);
-								y = xyz.Y / (1 << az);
-								xm = xyz.X & ((1 << az) - 1);
-								ym = xyz.Y & ((1 << az) - 1);
-								if (z > 0 && z <= getTileSource().ZOOM_MAXDNLD) {
-									String prevZurl = mTileURLGenerator.Get(x, y, z);
-//                                    zbmp = mPrevCachedCache.getMapTile(prevZurl);
-//                                    if (zbmp == null) {
-									data = mCacheProvider.getTile(prevZurl, x, y, z);
-									if (data != null && !isBlank(data))
-										try {
-											zbmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-										} catch (Throwable e) {
-											zbmp = null;
-										}
-//                                        if (zbmp != null) {
-//                                             mPrevCachedCache.putTile(prevZurl, zbmp);
-//                                        }
-//                                    }
+								// Attempt to get tile from previous zooms
+								Bitmap zbmp = null;
+								Bitmap tbmp;
+								Bitmap bmp;
+								int z;
+								int x;
+								int y;
+								int xm;
+								int ym;
+								int az = 0;
+								byte[] data;
+
+								do {
+									az += 1;
+									z = xyz.Z - az;
+									x = xyz.X / (1 << az);
+									y = xyz.Y / (1 << az);
+									xm = xyz.X & ((1 << az) - 1);
+									ym = xyz.Y & ((1 << az) - 1);
+									if (z > 0 && z <= getTileSource().ZOOM_MAXDNLD) {
+										String prevZurl = mTileURLGenerator.Get(x, y, z);
+										data = mCacheProvider.getTile(prevZurl, x, y, z);
+										if (data != null && !isBlank(data))
+											try {
+												zbmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+											} catch (Throwable e) {
+												zbmp = null;
+											}
+									}
+								} while (zbmp == null && z > 0 && az < getTileSource().mPrevZCached);
+
+								if (zbmp != null) {
+									bmp = scalePartOfBitmap(zbmp, (zbmp.getWidth() / (1 << az)) * xm, (zbmp.getHeight() / (1 << az)) * ym,
+											zbmp.getWidth() / (1 << az), zbmp.getHeight() / (1 << az),
+											zbmp.getWidth(), zbmp.getHeight());
+
+									if (mTileCache.putTile(xyz.TILEURL, bmp, MapTileMemCache.SRC_CACHE_SECOND, false, null))
+										bmpFlag = true;
+									else
+										bmp.recycle();
 								}
-							} while (zbmp == null && z > 0 && az < getTileSource().mPrevZCached);
 
-							if (zbmp != null) {
-								bmp = scalePartOfBitmap(zbmp, (zbmp.getWidth() / (1 << az)) * xm, (zbmp.getHeight() / (1 << az)) * ym,
-										zbmp.getWidth() / (1 << az), zbmp.getHeight() / (1 << az),
-										zbmp.getWidth(), zbmp.getHeight());
+								synchronized (mPendCache2Req) {
+									mPendCache2Req.remove(xyz.TILEURL);
+								}
 
-								if (mTileCache.putTile(xyz.TILEURL, bmp, MapTileMemCache.SRC_CACHE_SECOND, false, null))
-									bmpFlag = true;
-								else
-									bmp.recycle();
 							}
-
-							synchronized (mPendCache2Req) {
-								mPendCache2Req.remove(xyz.TILEURL);
-								fLast = mPendCache2Req.isEmpty();
-							}
-
-							if (fLast && bmpFlag) {
+							if (bmpFlag && mPendCache2Req.isEmpty()) {
 								SendMessageSuccess();
 								bmpFlag = false;
 							}
-
 						}
 					}
 				}
@@ -362,7 +350,6 @@ public class TileProviderBase {
 					boolean wasRun = false;
 
 					while (!mThreadPool.isShutdown()) {
-
 						synchronized (mPendTileReq) {
 							do {
 								xyz = null;
@@ -377,15 +364,14 @@ public class TileProviderBase {
 										xyz = null;
 								}
 
-								if (xyz == null)
+								if (xyz == null) {
 									try {
 										mPendTileReq.wait(170);
+										if (mPendTileReq.isEmpty() && wasRun)
+											clearUse = true;
 									} catch (InterruptedException e) {
 									}
-
-								if (mPendTileReq.isEmpty() && wasRun)
-									clearUse = true;
-
+								}
 							} while (xyz == null && !mThreadPool.isShutdown() && !clearUse);
 						}
 
@@ -394,7 +380,7 @@ public class TileProviderBase {
 								mInUse.flag2 = false;
 								clearUse = false;
 								wasRun = false;
-							} else {
+							} else if (xyz != null) {
 								mInUse.flag2 = true;
 								wasRun = true;
 							}
@@ -429,27 +415,22 @@ public class TileProviderBase {
 
 			byte[] data = null;
 			Bitmap bmp = null;
-			int ii=0;
 			boolean blank = true;
 
 			if (mXYZ.Z <= getTileSource().ZOOM_MAXDNLD) {
-				do {
+				try {
+					data = getSingleTile(mTileURLGenerator.getRealURL(mXYZ.TILEURL, mXYZ.X, mXYZ.Y));
+				} catch (Exception e) {
+					data = null;
+				}
+
+				blank = isBlank(data);
+				bmp = null;
+				if (data != null && !blank)
 					try {
-						data = getSingleTile(mTileURLGenerator.getRealURL(mXYZ.TILEURL, mXYZ.X, mXYZ.Y));
+						bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
 					} catch (Exception e) {
-						data = null;
 					}
-
-					blank = isBlank(data);
-                    bmp = null;
-					if (data != null && !blank)
-						try {
-							bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-						} catch (Exception e) {
-						}
-
-					ii = ii + 1;
-				} while (bmp == null && ii < 1); // 1 retries in requsted zoom
 			}
 
 			// Add to cache (on SD card)
