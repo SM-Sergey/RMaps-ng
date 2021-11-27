@@ -261,7 +261,6 @@ How to and FAQ you can find on http://robertdeveloper.blogspot.com/\n
   <string name="menu_reload">地図の再読み込み</string>
   <string name="menu_findthemap">地図を検索</string>
   <string name="menu_tools">ツール</string>
-  <string name="menu_downloadprepared">既存の地図をダウンロード</string>
   <string name="pref_circle_distance">同心円の表示</string>
   <string name="pref_circle_distance_summary">現在地の周りに距離を示す円を表示する</string>
   <string name="pref_coordformat">座標の書式</string>

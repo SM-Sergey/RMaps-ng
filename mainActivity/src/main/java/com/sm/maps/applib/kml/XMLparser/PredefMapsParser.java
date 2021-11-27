@@ -164,7 +164,7 @@ public class PredefMapsParser extends DefaultHandler {
 					if(mNeedOverlays && isLayer && !timeDependent 
 							//&& (mNeedProjection == 0 || mNeedProjection == Integer.parseInt(attributes.getValue(PROJECTION))) 
 							|| !mNeedOverlays && !isLayer) {
-						final MenuItem item = mSubmenu.add(R.id.isoverlay, Menu.NONE, Menu.NONE, attributes.getValue(NAME));
+						final MenuItem item = mSubmenu.add(mNeedOverlays ? R.id.isoverlay : R.id.ismap, Menu.NONE, Menu.NONE, attributes.getValue(NAME));
 						item.setTitleCondensed(attributes.getValue(ID));
 					}
 				}

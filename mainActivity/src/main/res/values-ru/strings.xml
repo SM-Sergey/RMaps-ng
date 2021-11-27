@@ -272,7 +272,6 @@ MD5-суммы вводятся через запятую.</string>
   <string name="menu_reload">Перезагрузить тайлы экрана</string>
   <string name="menu_findthemap">Карту на экран</string>
   <string name="menu_tools">Инструменты</string>
-  <string name="menu_downloadprepared">Загрузить оффлайн карты</string>
   <string name="pref_circle_distance">Круги расстояния</string>
   <string name="pref_circle_distance_summary">Круги появляются вокруг текущего местоположения и показывают расстояния кратные линейке масштаба</string>
   <string name="pref_coordformat">Формат координат</string>

@@ -2,8 +2,11 @@ package com.sm.maps.applib;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
@@ -55,7 +58,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
-import android.provider.Browser;
 import android.provider.SearchRecentSuggestions;
 import android.support.v4.view.ViewConfigurationCompat;
 import android.util.DisplayMetrics;
@@ -65,15 +67,12 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
-import android.view.inputmethod.BaseInputConnection;
-import android.view.KeyEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -81,12 +80,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v7.app.AppCompatActivity;
 
-import com.sm.maps.applib.R;
 import com.sm.maps.applib.dashboard.IndicatorManager;
 import com.sm.maps.applib.dashboard.IndicatorView;
 import com.sm.maps.applib.dashboard.IndicatorView.IndicatorViewMenuInfo;
 import com.sm.maps.applib.downloader.AreaSelectorActivity;
-import com.sm.maps.applib.downloader.FileDownloadListActivity;
 import com.sm.maps.applib.kml.PoiActivity;
 import com.sm.maps.applib.kml.PoiCategoryListActivity;
 import com.sm.maps.applib.kml.PoiListActivity;
@@ -176,6 +173,23 @@ public class MainActivity extends AppCompatActivity {
 		mAct = this;
 
 		mHasMenuButton = ViewConfigurationCompat.hasPermanentMenuKey(ViewConfiguration.get(this));
+
+		File folder = Ut.getRMapsMainDir(this, "");
+		String filename = folder.getAbsolutePath() + "/forcemenu.txt";
+		File file = new File(filename);
+		if (file.exists()) {
+			try {
+				BufferedReader br = new BufferedReader(new FileReader(file));
+				String line = br.readLine();
+				if (line != null && line.equals("0"))
+					mHasMenuButton = true;
+				else
+					mHasMenuButton = false;
+			} catch (IOException e)
+			{
+
+			}
+		}
 
 		CreateContentView();
 		
@@ -924,10 +938,7 @@ public class MainActivity extends AppCompatActivity {
 		return super.onPrepareOptionsMenu(menu);
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		super.onOptionsItemSelected(item);
-
+	private boolean onOptionsItemSelectedPriv(MenuItem item) {
 		final GeoPoint point = mMap.getMapCenter();
 
 		if(item.getItemId() == R.id.area_selector) {
@@ -939,16 +950,13 @@ public class MainActivity extends AppCompatActivity {
 				mIndicatorManager.setCenter(mMap.getMapCenter());
 				mIndicatorManager.setMapName(mTileSource.NAME);
 				mIndicatorManager.setZoom(mMap.getZoomLevel());
-		        mIndicatorManager.setLocation(mMyLocationOverlay.getLastLocation());
-		        mIndicatorManager.setTargetLocation(mMyLocationOverlay.getTargetLocation());
-		        mIndicatorManager.Resume(this);
+				mIndicatorManager.setLocation(mMyLocationOverlay.getLastLocation());
+				mIndicatorManager.setTargetLocation(mMyLocationOverlay.getTargetLocation());
+				mIndicatorManager.Resume(this);
 			} else {
 				mIndicatorManager.Dismiss(this);
 				mIndicatorManager = null;
 			}
-			return true;
-		} else if(item.getItemId() == R.id.downloadprepared) {
-			startActivity(new Intent(this, FileDownloadListActivity.class));
 			return true;
 		} else if(item.getItemId() == R.id.tools) {
 			return true;
@@ -964,7 +972,8 @@ public class MainActivity extends AppCompatActivity {
 			return true;
 		} else if(item.getItemId() == R.id.gpsstatus) {
 			try {
-				startActivity(new Intent("com.eclipsim.gpsstatus.VIEW"));
+				Intent intent = getPackageManager().getLaunchIntentForPackage("com.eclipsim.gpsstatus2");
+				startActivity(intent);
 			} catch (ActivityNotFoundException e) {
 				Toast.makeText(this,
 						R.string.message_nogpsstatus,
@@ -1010,7 +1019,7 @@ public class MainActivity extends AppCompatActivity {
 			mCompassView.setVisibility(mCompassEnabled ? View.VISIBLE : View.INVISIBLE);
 			if(mCompassEnabled)
 				mOrientationSensorManager.registerListener(mListener, mOrientationSensorManager
-					.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_UI);
+						.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_UI);
 			else {
 				mOrientationSensorManager.unregisterListener(mListener);
 				mMap.setBearing(0);
@@ -1025,17 +1034,23 @@ public class MainActivity extends AppCompatActivity {
 			System.exit(10);
 			return true;
 		} else {
-			
+
 			final String mapid = (String)item.getTitleCondensed();
 			setTileSource(mapid, "", true);
-			
+
 			FillOverlays();
 
-	        setTitle();
+			setTitle();
 
 			return true;
 		}
 
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		super.onOptionsItemSelected(item);
+		return onOptionsItemSelectedPriv(item);
 	}
 
 	private void doFindTheMap() {
@@ -1105,7 +1120,7 @@ public class MainActivity extends AppCompatActivity {
 		final String lastMapID = mTileSource == null ? TileSource.MAPNIK : mTileSource.ID;
 		
 		if(mTileSource != null) mTileSource.Free();
-		
+
 		if(overlayId != null && !overlayId.equalsIgnoreCase("") && aShowOverlay) {
 			mOverlayId = overlayId;
 			mShowOverlay = true;
@@ -1230,16 +1245,16 @@ public class MainActivity extends AppCompatActivity {
 		if (item.getGroupId() == R.id.isoverlay) {
 			final String overlayid = (String)item.getTitleCondensed();
 			setTileSource(mTileSource.ID, overlayid, true);
-			
 			FillOverlays();
 	        setTitle();
-	        
+		} else if(item.getGroupId() == R.id.ismap) {
+			onOptionsItemSelectedPriv(item);
 		} else if(item.getGroupId() == R.id.menu_dashboard_edit) {
 			final IndicatorViewMenuInfo info = (IndicatorViewMenuInfo) item.getMenuInfo();
 			final IndicatorView iv = info.IndicatorView;
 			mIndicatorManager.putTagToIndicatorView(iv, item.getTitleCondensed().toString());
 			mMap.invalidate(); //postInvalidate();
-			
+
 		} else {
 			if(item.getItemId() == R.id.clear) {
 				mMeasureOverlay.Clear();
@@ -1379,7 +1394,7 @@ public class MainActivity extends AppCompatActivity {
 				}
 			}
 			else
-				onOptionsItemSelected(item);
+				onOptionsItemSelectedPriv(item);
 		}
 		
 		final ContextMenuInfo menuInfo = item.getMenuInfo();

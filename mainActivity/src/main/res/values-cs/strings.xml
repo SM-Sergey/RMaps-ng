@@ -258,7 +258,6 @@ Napište mi email, pokud potřebujete rozšířit tento seznam parametrů.\n</st
   <string name="menu_reload">Obnovit dlaždice obrazovky</string>
   <string name="menu_findthemap">Najít mapu</string>
   <string name="menu_tools">Nástroje</string>
-  <string name="menu_downloadprepared">Stáhnout připravené mapy</string>
   <string name="pref_circle_distance">Kruhy vzdálenosti</string>
   <string name="pref_circle_distance_summary">Kruhy kolem vaší pozice ukazují vzdálenost podobně jako ukazatel měřítka</string>
   <string name="pref_coordformat">Formát souřadnic</string>

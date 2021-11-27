@@ -265,7 +265,6 @@ http://c.tile.openstreetmap.org/{z}/{x}/{y}.png\n
   <string name="menu_reload">重新加载屏幕图块</string>
   <string name="menu_findthemap">查找地图</string>
   <string name="menu_tools">工具</string>
-  <string name="menu_downloadprepared">下载已有离线图</string>
   <string name="pref_circle_distance">环形区域</string>
   <string name="pref_circle_distance_summary">在当前位置的周围显示一个圆环，类似刻度指示。</string>
   <string name="pref_coordformat">坐标格式</string>

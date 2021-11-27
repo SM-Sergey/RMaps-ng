@@ -23,6 +23,7 @@
     <item name="tile_error" type="id"/>
     <item name="download_start" type="id"/>
     <item name="downloader_service" type="id"/>
+    <item name="ismap" type="id"/>
     <dimen name="zoom_ctrl_padding">5dp</dimen>
     
 </resources>

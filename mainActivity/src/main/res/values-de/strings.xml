@@ -265,7 +265,6 @@ Schreib mir eine E-Mail, wenn Du diese Parameterliste erweitern möchtest.\n</st
   <string name="menu_reload">Erneutes Laden der Bildschirm-Kacheln</string>
   <string name="menu_findthemap">Karte finden</string>
   <string name="menu_tools">Werkzeuge</string>
-  <string name="menu_downloadprepared">Lade vorbereitete Karten</string>
   <string name="pref_circle_distance">Entfernungs-Kreise</string>
   <string name="pref_circle_distance_summary">In Deiner Umgebung erscheinen Kreise, welche die Entfernung ähnlich einer Maßstabsanzeige anzeigen</string>
   <string name="pref_coordformat">Koordinatenformat</string>

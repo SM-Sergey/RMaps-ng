@@ -263,7 +263,6 @@ Scrivetemi una email se avete bisogno di estendere la lista dei parametri.\n
   <string name="menu_reload">Ricarica schermata delle tiles</string>
   <string name="menu_findthemap">Trova mappa</string>
   <string name="menu_tools">Strumenti</string>
-  <string name="menu_downloadprepared">Scaricare mappe preparate</string>
   <string name="pref_circle_distance">Anelli di distanza</string>
   <string name="pref_circle_distance_summary">Gli anelli appaiono intorno alla tua posizione che mostra la distanza come indicatore di scala</string>
   <string name="pref_coordformat">Formato coordinate</string>

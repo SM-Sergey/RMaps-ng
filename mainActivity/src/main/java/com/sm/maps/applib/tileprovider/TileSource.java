@@ -236,6 +236,10 @@ public class TileSource extends TileSourceBase {
 		return mTileProvider.getTile(x, y, z);
 	}
 
+	public byte[] downloadTile(String tileURL, String logFileName) {
+		return mTileProvider.getSingleTile(tileURL, logFileName);
+	}
+
 	public String getTileURL (final int x, final int y, final int z) {
 	   return mTileProvider.mTileURLGenerator.getRealURL(mTileProvider.mTileURLGenerator.Get(x,y,z),x,y);
 	}

@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="whats_new_dialog_text">
-<b>Do you like RMaps-ng? Buy RMaps-ng.Donation on Google Play Store</b>\n
-\n
 Do you want to help me translate the app interface? Write me to email sm@venus.ru\n
+\n
+v.0.10.0.1p12\n
+- Fixed main menu on some devices\n
+- "forcemenu" for some devices\n
+- Fixed some map sources\n
+- Map downloader unified with map viewer\n
+- fixed GPS Status\n
++ up to 4 retries on HTTP errors other than 403 or 404\n
 \n
 v.0.10.0.1p9\n
 - Now this is <b>RMaps-ng</b> !!!!\n

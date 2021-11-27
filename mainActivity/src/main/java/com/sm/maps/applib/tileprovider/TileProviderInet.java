@@ -71,34 +71,68 @@ public class TileProviderInet extends TileProviderBase {
 	}
 
 	@Override
-	protected byte[] getSingleTile(String tileurl) {
+	public byte[] getSingleTile(String tileurl, String logFilename) {
 
 		InputStream in = null;
 		OutputStream out = null;
-		byte[] data;
+		HttpURLConnection conn;
+		byte[] data = null;
+		int rc, retry;
 
 		Ut.w("FROM INTERNET " + tileurl);
 
 		try {
-		    HttpURLConnection conn = (HttpURLConnection) (new URL(tileurl)).openConnection();
-            conn.setRequestProperty("User-Agent", mCtx.getString(R.string.user_agent));
-            conn.setRequestProperty("Accept", mCtx.getString(R.string.accept_content));
-            conn.setRequestMethod("GET");
-			in = new BufferedInputStream(conn.getInputStream(), StreamUtils.IO_BUFFER_SIZE);
-			final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-			out = new BufferedOutputStream(dataStream, StreamUtils.IO_BUFFER_SIZE);
-			StreamUtils.copy(in, out);
-			out.flush();
-			data = dataStream.toByteArray();
+			conn = (HttpURLConnection) (new URL(tileurl)).openConnection();
+			conn.setRequestProperty("User-Agent", mCtx.getString(R.string.user_agent));
+			conn.setRequestProperty("Accept", mCtx.getString(R.string.accept_content));
+			conn.setRequestMethod("GET");
 		} catch (Exception e) {
-			data = null;
-		} finally {
-			if (in != null)
-				StreamUtils.closeStream(in);
-			if (out != null)
-				StreamUtils.closeStream(out);
+			conn = null;
 		}
-
+		if (conn != null) {
+			retry = 0;
+			do {
+				rc = -1; // if exception occurs before getResponseCode - NO RETRY!
+				try {
+					conn.connect();
+					rc = conn.getResponseCode();
+					if (rc != 200 && logFilename != null)
+						Ut.appendLog(logFilename, String.format("%tc %s: Resp: %d %s", System.currentTimeMillis(), tileurl, rc, conn.getResponseMessage()));
+					if (rc < 400) {
+						in = new BufferedInputStream(conn.getInputStream(), StreamUtils.IO_BUFFER_SIZE);
+						final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+						out = new BufferedOutputStream(dataStream, StreamUtils.IO_BUFFER_SIZE);
+						StreamUtils.copy(in, out);
+						out.flush();
+						data = dataStream.toByteArray();
+					} else
+						data = null;
+				} catch (Exception e) {
+					if (logFilename != null)
+						Ut.appendLog(logFilename, String.format("%tc %s: Xcpt: %s; %s", System.currentTimeMillis(), tileurl, e.toString(), e.getMessage()));
+					data = null;
+				} catch (OutOfMemoryError e) {
+					if (logFilename != null)
+						Ut.appendLog(logFilename, String.format("%tc %s: OutOfMem: %s; %s", System.currentTimeMillis(), tileurl, e.toString(), e.getMessage()));
+					data = null;
+					rc = -1;
+				} finally {
+					if (in != null)
+						StreamUtils.closeStream(in);
+					if (out != null)
+						StreamUtils.closeStream(out);
+					in = null;
+					out = null;
+					if (conn != null)
+						conn.disconnect();
+				}
+				if (rc == 404 || rc == 403 || rc < 0)
+					retry = 999; // no retries for 404, 403 and out of memory
+				else {
+					retry = retry + 1;
+				}
+			} while (data == null && retry <= 4);
+		}
 		return data;
 	}
 

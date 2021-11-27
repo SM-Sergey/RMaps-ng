@@ -153,7 +153,7 @@ public class MapDownloaderService extends Service {
 		showNotification();
 		
 		try {
-			mTileSource = new TileSource(this, mMapID, true, false);
+			mTileSource = new TileSource(this, mMapID, true, true);
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			return;
@@ -366,6 +366,7 @@ public class MapDownloaderService extends Service {
 			int tileCnt = 0;
 			
 			while (continueExecute && !mThreadPool.isShutdown()) {
+
 				synchronized (mTileIterator) {
 					if (mTileIterator.hasNext()) {
 						tileParam = mTileIterator.next();
@@ -374,75 +375,45 @@ public class MapDownloaderService extends Service {
 						tileParam = null;
 					}
 				}
-				
+
 				if (tileParam != null) {
-					tileParam.TILEURL = mTileSource.getTileURLGenerator().Get(tileParam.X, tileParam.Y, tileParam.Z);
-					tileParam.realURL = mTileSource.getTileURLGenerator().getRealURL(tileParam.TILEURL, tileParam.X, tileParam.Y);
-					InputStream in = null;
-					OutputStream out = null;
-					HttpURLConnection connection = null;
-					
-					try {
-						if (mOverwriteFile || mOverwriteTiles || !mMapDatabase.existsTile(tileParam.X, tileParam.Y, tileParam.Z)) {
-							
-							byte[] data = null;
-							final URL url = new URL(tileParam.realURL);
-				        	connection = (HttpURLConnection) url.openConnection();
-							connection.setRequestProperty("User-Agent", getString(R.string.user_agent));
-							connection.setRequestProperty("Accept", getString(R.string.accept_content));
-							connection.setRequestMethod("GET");
+					if (mOverwriteFile || mOverwriteTiles || !mMapDatabase.existsTile(tileParam.X, tileParam.Y, tileParam.Z)) {
 
-				            connection.connect();
+						tileParam.TILEURL = mTileSource.getTileURLGenerator().Get(tileParam.X, tileParam.Y, tileParam.Z);
+						tileParam.realURL = mTileSource.getTileURLGenerator().getRealURL(tileParam.TILEURL, tileParam.X, tileParam.Y);
+						byte[] data = mTileSource.downloadTile(tileParam.realURL, mLogFileName);
+						tileCnt = tileCnt + 1;
+						if (data != null) {
+							try {
 
-				            if(connection.getResponseCode() != 200)
-								Ut.appendLog(mLogFileName, String.format("%tc %s\n	Response: %d %s", System.currentTimeMillis(), tileParam.realURL, connection.getResponseCode(), connection.getResponseMessage()));
-
-				            tileCnt = tileCnt + 1;
-
-							in = new BufferedInputStream(url.openStream(), StreamUtils.IO_BUFFER_SIZE);
-							
-							final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-							out = new BufferedOutputStream(dataStream, StreamUtils.IO_BUFFER_SIZE);
-							StreamUtils.copy(in, out);
-							out.flush();
-							
-							data = dataStream.toByteArray();
-							
-							if (data != null) {
 								if (mOverwriteTiles)
 									mMapDatabase.deleteTile(tileParam.TILEURL, tileParam.X, tileParam.Y, tileParam.Z);
-								
+
 								mMapDatabase.putTile(tileParam.X, tileParam.Y, tileParam.Z, data);
+
+								if (mHandler != null)
+									Message.obtain(mHandler, R.id.tile_done, tileParam).sendToTarget();
+
+							} catch (Exception e) {
+								Ut.appendLog(mLogFileName, String.format("%tc %s: Err2: %s %s", System.currentTimeMillis(), tileParam.TILEURL, e.toString(), e.getMessage()));
+								if (mHandler != null)
+									Message.obtain(mHandler, R.id.tile_error, tileParam).sendToTarget();
 							}
+						} else {
+							if (mHandler != null)
+								Message.obtain(mHandler, R.id.tile_error, tileParam).sendToTarget();
 						}
-						
+
+						if (tileCnt >= 200) {
+							tileCnt = 0;
+							System.gc();
+						}
+					} else {
+						// Tile already exists
 						if (mHandler != null)
 							Message.obtain(mHandler, R.id.tile_done, tileParam).sendToTarget();
-					} catch (Exception e) {
-						Ut.appendLog(mLogFileName, String.format("%tc %s\n	Error: %s", System.currentTimeMillis(), tileParam.TILEURL, e.getMessage()));
-						if (mHandler != null)
-							Message.obtain(mHandler, R.id.tile_error, tileParam).sendToTarget();
-					} catch (OutOfMemoryError e) {
-						Ut.appendLog(mLogFileName, String.format("%tc %s\n	Error: %s", System.currentTimeMillis(), tileParam.TILEURL, e.getMessage()));
-						if (mHandler != null)
-							Message.obtain(mHandler, R.id.tile_error, tileParam).sendToTarget();
-						System.gc();
-					} finally {
-						if (in != null) StreamUtils.closeStream(in);
-						if (out != null) StreamUtils.closeStream(out);
-						if (connection != null) connection.disconnect();
 					}
-
-					if (tileCnt == 1000) {
-						tileCnt = 0;
-						System.gc();
-					}
-					
 				}
-//				try {
-//					Thread.sleep(400);
-//				} catch (InterruptedException e) {
-//				}
 			}
 			
 			if (mHandler != null)

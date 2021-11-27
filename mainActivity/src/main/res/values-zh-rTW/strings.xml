@@ -261,7 +261,6 @@ http://c.tile.openstreetmap.org/{z}/{x}/{y}.png\n
   <string name="menu_reload">重新載入畫面圖磚</string>
   <string name="menu_findthemap">尋找地圖</string>
   <string name="menu_tools">工具</string>
-  <string name="menu_downloadprepared">Download maps prepared</string>
   <string name="pref_circle_distance">Distance rings</string>
   <string name="pref_circle_distance_summary">Rings appear  around your location that show distance like scale indicator</string>
   <string name="pref_coordformat">座標格式</string>

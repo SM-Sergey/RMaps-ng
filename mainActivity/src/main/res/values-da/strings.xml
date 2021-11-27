@@ -242,7 +242,6 @@
   <string name="menu_reload">Genindlæs skærmfliser</string>
   <string name="menu_findthemap">Find kortet</string>
   <string name="menu_tools">Værktøjer</string>
-  <string name="menu_downloadprepared">Download forberedte kort</string>
   <string name="pref_circle_distance">Afstandsringe</string>
   <string name="pref_circle_distance_summary">Ringe vises rundt om din placering, der viser afstande ligesom skalaindikator</string>
   <string name="pref_coordformat">Koordinater format</string>

@@ -441,12 +441,11 @@ public class TileProviderBase {
 					}
 
 					blank = isBlank(data);
-
+                    bmp = null;
 					if (data != null && !blank)
 						try {
 							bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
 						} catch (Exception e) {
-							bmp = null;
 						}
 
 					ii = ii + 1;
@@ -454,7 +453,7 @@ public class TileProviderBase {
 			}
 
 			// Add to cache (on SD card)
-			if (mCacheProvider != null && getTileSource().mOnlineMapCacheEnabled && (bmp != null || (data != null && blank))) {
+			if (mCacheProvider != null && getTileSource().mOnlineMapCacheEnabled && bmp != null) {
 				if (mXYZ.mReload)
 					mCacheProvider.deleteTile(mXYZ.TILEURL, mXYZ.X, mXYZ.Y, mXYZ.Z);
 				try {
@@ -466,7 +465,6 @@ public class TileProviderBase {
 			if (bmp == null && getTileSource().mPrevZInet != 0) {
 				// attempt to download from smaller zoom
 				Bitmap zbmp = null;
-				Bitmap tbmp;
 				int z;
 				int x;
 				int y;
@@ -492,14 +490,14 @@ public class TileProviderBase {
 
 						blank = isBlank(data);
 
+						zbmp = null;
 						if (data != null && !blank)
 							try {
 								zbmp = BitmapFactory.decodeByteArray(data, 0, data.length);
 							} catch (Throwable e) {
-								zbmp = null;
 							}
 
-						if (mCacheProvider != null && getTileSource().mOnlineMapCacheEnabled && (zbmp != null || (data != null && blank))) {
+						if (mCacheProvider != null && getTileSource().mOnlineMapCacheEnabled && zbmp != null) {
 							// Add to cache (on SD card)
 							if (mXYZ.mReload)
 								mCacheProvider.deleteTile(prevZURL, x, y, z);
@@ -621,7 +619,8 @@ public class TileProviderBase {
 		return 0;
 	}
 
-	protected byte[] getSingleTile(String tileurl) { return null; }
+    public byte[] getSingleTile(String tileurl, String logFilename) { return null; }
+	public byte[] getSingleTile(String tileurl) { return getSingleTile(tileurl, null); }
 	protected byte[] getSingleTile(int x, int y, int z) { return null; }
 
 	protected class XYZ {
