@@ -456,6 +456,14 @@ public class MainActivity extends AppCompatActivity {
 					setLastKnownLocation();
 				}
 			});
+
+            ivAutoFollow.setOnLongClickListener(new View.OnLongClickListener() {
+                public boolean onLongClick(View v) {
+                    mTileSource.setReloadTileMode(true);
+                    mMap.invalidate();
+                    return true;
+                }
+            });
 		}
 
 		final int pad = getResources().getDimensionPixelSize(R.dimen.zoom_ctrl_padding);
