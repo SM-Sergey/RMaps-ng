@@ -76,8 +76,11 @@ public class MapTileMemCache {
 			CacheItem ci = this.mHardCachedTiles.get(aTileURLString);
 			if (ci != null)
 				bmpHard = ci.bmp;
-			if(bmpHard != null && !bmpHard.isRecycled())
-				return bmpHard;
+			if(bmpHard != null)
+				if (!bmpHard.isRecycled())
+					return bmpHard;
+				else
+					removeTile(aTileURLString);
 		}
 		return null;
 	}

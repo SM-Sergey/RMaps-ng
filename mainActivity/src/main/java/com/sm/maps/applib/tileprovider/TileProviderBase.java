@@ -657,7 +657,7 @@ public class TileProviderBase {
 		mReloadTileMode = mode;
 	}
 
-	protected boolean isPending(String tileURL) {
+	protected int isPending(String tileURL) {
 
 		boolean contains;
 
@@ -666,20 +666,20 @@ public class TileProviderBase {
 		}
 
 		if (contains)
-			return true;
+			return 1;
 
 		synchronized(mPendCache2Req) {
 			contains = mPendCache2Req.containsKey(tileURL);
 		}
 
 		if (contains)
-			return true;
+			return 2;
 
 		synchronized(mPendTileReq) {
 			contains = mPendTileReq.containsKey(tileURL);
 		}
 
-		return contains;
+		return contains ? 3 : 0;
 	}
 
 	protected void requestTile (XYZ xyz) {
@@ -702,13 +702,11 @@ public class TileProviderBase {
 				return bmp;
 		}
 
-		if (isPending(tileurl))
-			return mLoadingMapTile;
+		int p = isPending(tileurl);
 
-		XYZ xyz = new XYZ(tileurl,x,y,z);
-
-		requestTile(xyz);
-
+		if (p == 0 || p == 3)
+			requestTile(new XYZ(tileurl, x, y, z));
+		
 		return mLoadingMapTile;
 	}
 
