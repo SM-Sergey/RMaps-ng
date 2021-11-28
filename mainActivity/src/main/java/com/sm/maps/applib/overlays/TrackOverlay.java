@@ -35,6 +35,7 @@ public class TrackOverlay extends TileViewOverlay {
 	private Handler mMainMapActivityCallbackHandler;
 	private boolean mStopDraw = false;
 	private com.sm.maps.applib.view.TileView.OpenStreetMapViewProjection mProjection;
+	private double mLastTS;
 
 	protected ExecutorService mThreadExecutor = Executors.newSingleThreadExecutor(new SimpleThreadFactory("TrackOverlay"));
 
@@ -97,6 +98,7 @@ public class TrackOverlay extends TileViewOverlay {
 		mBaseCoords = new Point();
 		mBaseLocation = new GeoPoint(0, 0);
 		mLastZoom = -1;
+		mLastTS = 1.0;
 		mThread = new TrackThread();
 		mThread.setName("Track thread");
 	}
@@ -119,9 +121,10 @@ public class TrackOverlay extends TileViewOverlay {
 	protected void onDraw(Canvas c, TileView osmv) {
 		if(mStopDraw) return;
 
-		if (!mThreadRunned && (mTracks == null || mLastZoom != osmv.getZoomLevel())) {
+		if (!mThreadRunned && (mTracks == null || mLastZoom != osmv.getZoomLevel()) || mLastTS != osmv.getTouchScale() ) {
 			mPaths = null;
 			mLastZoom = osmv.getZoomLevel();
+			mLastTS = osmv.getTouchScale();
 			mOsmv = osmv;
 			mProjection = mOsmv.getProjection();
 			mThreadRunned = true;
@@ -140,7 +143,6 @@ public class TrackOverlay extends TileViewOverlay {
 		c.save();
 		if(screenCoords.x != mBaseCoords.x && screenCoords.y != mBaseCoords.y){
 			c.translate(screenCoords.x - mBaseCoords.x, screenCoords.y - mBaseCoords.y);
-			c.scale((float)osmv.getTouchScale(), (float)osmv.getTouchScale(), mBaseCoords.x, mBaseCoords.y);
 		};
 		for(int i = 0; i < mPaths.length; i++)
 			if(mPaths[i] != null && mPaints[i] != null)

@@ -3,6 +3,10 @@
     <string name="whats_new_dialog_text">
 Do you want to help me translate the app interface? Write me to email sm@venus.ru\n
 \n
+v.0.10.0.1p13\n
+- Fixed white spots on cached tiles while active movement of the map\n
+- Fixed track drawing for non-integer zoom\'s\n
+\n
 v.0.10.0.1p12\n
 - Fixed main menu on some devices\n
 - "forcemenu" for some devices\n
