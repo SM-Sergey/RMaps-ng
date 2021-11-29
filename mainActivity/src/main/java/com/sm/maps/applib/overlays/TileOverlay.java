@@ -124,11 +124,17 @@ public class TileOverlay extends TileViewOverlay implements OpenStreetMapConstan
 					centerMapTileCoords[LONGITUDE] };
 
 			int x, y, r = 0, tilecnt = 0;
+			float b = tileView.getBearing();
 			mMatrixBearing.reset();
-			mMatrixBearing.setRotate(360 - tileView.getBearing(), tileView.getWidth() / 2, tileView.getHeight() / 2);
+			mMatrixBearing.setRotate(360 - b, tileView.getWidth() / 2, tileView.getHeight() / 2);
 
-			int RX = ( (tileView.getWidth()+1)/2 + tileSizePx - 1) / tileSizePx;
-			int RY = ( (tileView.getHeight()+1)/2 + tileSizePx - 1) / tileSizePx;
+			b = (float)Math.PI * b / 180.0f;
+
+			int w = (int)(tileView.getWidth()*Math.abs(Math.cos(b)) + tileView.getHeight()*Math.abs(Math.sin(b)));
+			int h = (int)(tileView.getWidth()*Math.abs(Math.sin(b)) + tileView.getHeight()*Math.abs(Math.cos(b)));
+
+			int RX = ( (w+1)/2 + tileSizePx - 1) / tileSizePx;
+			int RY = ( (h+1)/2 + tileSizePx - 1) / tileSizePx;
 
 			if (tileView.mInZoom) {
 				if (RX > mLastRX) RX = mLastRX;
