@@ -981,7 +981,10 @@ public class MainActivity extends AppCompatActivity {
 		} else if(item.getItemId() == R.id.gpsstatus) {
 			try {
 				Intent intent = getPackageManager().getLaunchIntentForPackage("com.eclipsim.gpsstatus2");
-				startActivity(intent);
+				if (intent == null)
+					throw new ActivityNotFoundException();
+				else
+					startActivity(intent);
 			} catch (ActivityNotFoundException e) {
 				Toast.makeText(this,
 						R.string.message_nogpsstatus,
